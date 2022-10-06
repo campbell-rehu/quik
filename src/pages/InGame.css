@@ -1,0 +1,28 @@
+body {
+  padding: 10px;
+  font-family: sans-serif;
+}
+
+.letters-container {
+  max-width: 1000px;
+  display: grid;
+  grid-template-columns: auto auto auto auto auto;
+  padding: 10px;
+}
+.letter {
+  background-color: rgba(255, 255, 255, 0.8);
+  border: 1px solid rgba(0, 0, 0, 0.8);
+  padding: 20px;
+  font-size: 30px;
+  text-align: center;
+  user-select: none;
+}
+
+.used {
+  color: white;
+  background-color: grey;
+  border: 1px solid grey;
+  padding: 20px;
+  font-size: 30px;
+  text-align: center;
+}
