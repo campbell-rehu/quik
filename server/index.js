@@ -81,10 +81,10 @@ io.on('connection', function (socket) {
   socket.on(SocketEventTypes.EndTurn, function (msg) {
     var { roomId, player } = JSON.parse(msg)
     var nextPlayerIndex = playersByRoomId[roomId].indexOf(player) + 1
-    if (nextPlayerIndex > playersByRoomId[roomId].length) {
+    if (nextPlayerIndex > playersByRoomId[roomId].length - 1) {
       nextPlayerIndex = 0
     }
-    var nextPlayer = playersByRoomId.roomId[nextPlayerIndex]
+    var nextPlayer = playersByRoomId[roomId][nextPlayerIndex]
     emitToRoom(socket, roomId, SocketEventTypes.StartTurn, nextPlayer)
   })
 })
@@ -101,6 +101,10 @@ const getRoomUsedLetters = (roomId) => {
 }
 
 const emitToRoom = (socket, roomId, eventType, message) => {
+  console.log(
+    `emitting message type=${eventType} to room id=${roomId}`,
+    message
+  )
   // emit message to room
   socket.to(`${roomId}`).emit(eventType, message)
 
@@ -111,9 +115,10 @@ const emitToRoom = (socket, roomId, eventType, message) => {
 const addPlayerToRoom = (roomId, player) => {
   if (playersByRoomId[roomId]) {
     if (!playersByRoomId[roomId].includes(player)) {
-      playersByRoomId.push(player)
+      playersByRoomId[roomId].push(player)
+    } else {
+      console.log(`Player id=${player} is already in the room id=${roomId}`)
     }
-    console.log(`Player ${player} is already in the room id=${roomId}`)
   } else {
     playersByRoomId[roomId] = [player]
   }
