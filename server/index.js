@@ -58,12 +58,10 @@ io.on('connection', function (socket) {
     )
     socket.join(`${roomId}`)
     addPlayerToRoom(roomId, socket.id)
-    emitToRoom(
-      socket,
-      roomId,
-      SocketEventTypes.RoomJoined,
-      getRoomUsedLetters(roomId)
-    )
+    emitToRoom(socket, roomId, SocketEventTypes.RoomJoined, {
+      usedLetters: getRoomUsedLetters(roomId),
+      currentPlayer: playersByRoomId[roomId][0],
+    })
   })
 
   socket.on(SocketEventTypes.SelectLetter, function (msg) {
