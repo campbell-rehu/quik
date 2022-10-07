@@ -14,6 +14,7 @@ const { SocketEventTypes } = require('./types')
 const port = 5000
 
 let usedLettersByRoomId = {}
+let playersByRoomId = {}
 
 app.use(cors({ origin: '*' }))
 app.use(express.json())
@@ -56,6 +57,7 @@ io.on('connection', function (socket) {
       `client with ip address=${clientIpAddress} joining room id=${roomId}`
     )
     socket.join(`${roomId}`)
+    addPlayerToRoom(roomId, socket.id)
     emitToRoom(
       socket,
       roomId,
@@ -74,6 +76,16 @@ io.on('connection', function (socket) {
     usedLetters[letter] = !Boolean(usedLetters[letter])
 
     emitToRoom(socket, roomId, SocketEventTypes.LetterSelected, usedLetters)
+  })
+
+  socket.on(SocketEventTypes.EndTurn, function (msg) {
+    var { roomId, player } = JSON.parse(msg)
+    var nextPlayerIndex = playersByRoomId[roomId].indexOf(player) + 1
+    if (nextPlayerIndex > playersByRoomId[roomId].length) {
+      nextPlayerIndex = 0
+    }
+    var nextPlayer = playersByRoomId.roomId[nextPlayerIndex]
+    emitToRoom(socket, roomId, SocketEventTypes.StartTurn, nextPlayer)
   })
 })
 
@@ -94,4 +106,15 @@ const emitToRoom = (socket, roomId, eventType, message) => {
 
   // emit message to sender
   socket.emit(eventType, message)
+}
+
+const addPlayerToRoom = (roomId, player) => {
+  if (playersByRoomId[roomId]) {
+    if (!playersByRoomId[roomId].includes(player)) {
+      playersByRoomId.push(player)
+    }
+    console.log(`Player ${player} is already in the room id=${roomId}`)
+  } else {
+    playersByRoomId[roomId] = [player]
+  }
 }

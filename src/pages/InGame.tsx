@@ -33,6 +33,7 @@ export const InGame: React.FC<Props> = ({ hardMode }) => {
     StringArrayToBooleanMap(Object.values(LettersEasy))
   )
   const [resetTimer, setResetTimer] = useState<boolean>(false)
+  const [currentPlayer, setCurrentPlayer] = useState<string>('')
   const toggleSelectLetter = (letter: string) => {
     if (letterSet[letter]) {
       socket?.emit(
@@ -40,6 +41,14 @@ export const InGame: React.FC<Props> = ({ hardMode }) => {
         JSON.stringify({ roomId, letter })
       )
     }
+  }
+
+  const endTurn = () => {
+    setResetTimer(true)
+    socket?.emit(
+      SocketEventType.EndTurn,
+      JSON.stringify({ roomId, player: socket.id })
+    )
   }
 
   const handleKeyDown = (e: KeyboardEvent) => {
@@ -56,6 +65,9 @@ export const InGame: React.FC<Props> = ({ hardMode }) => {
     })
     socket?.on(SocketEventType.RoomJoined, (usedLetters) => {
       setUsedLetters(usedLetters)
+    })
+    socket?.on(SocketEventType.StartTurn, (currentPlayer) => {
+      setCurrentPlayer(currentPlayer)
     })
     return () => {
       socket?.off(SocketEventType.LetterSelected)
@@ -118,7 +130,8 @@ export const InGame: React.FC<Props> = ({ hardMode }) => {
       letterSet={letterSet}
       usedLetters={usedLetters}
       toggleSelectLetter={toggleSelectLetter}
-      setResetTimer={setResetTimer}
+      endTurn={endTurn}
+      currentPlayer={currentPlayer}
     />
   )
 }

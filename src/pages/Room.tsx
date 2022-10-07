@@ -10,7 +10,8 @@ interface Props {
   letterSet: BooleanMap
   usedLetters: BooleanMap
   toggleSelectLetter: (letter: string) => void
-  setResetTimer: (setTimer: boolean) => void
+  endTurn: () => void
+  currentPlayer: string
 }
 
 export const Room: React.FC<Props> = ({
@@ -19,7 +20,8 @@ export const Room: React.FC<Props> = ({
   letterSet,
   usedLetters,
   toggleSelectLetter,
-  setResetTimer,
+  endTurn,
+  currentPlayer,
 }) => {
   return (
     <section>
@@ -37,8 +39,8 @@ export const Room: React.FC<Props> = ({
         ))}
       </div>
       <div className='topic-container'>Harry Potter Characters</div>
-      <div className='turn-container'>Player 1's turn</div>
-      <button onClick={() => setResetTimer(true)}>End Turn</button>
+      <div className='turn-container'>{currentPlayer}'s turn</div>
+      <button onClick={endTurn}>End Turn</button>
     </section>
   )
 }
