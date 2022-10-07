@@ -29,5 +29,5 @@ npm run start
 Run the following command from the `server` directory:
 
 ```bash
-npm run start
+npm run dev
 ```

@@ -1,36 +1,55 @@
-var express = require('express')
-var app = express()
-// var expressWs = require('express-ws')(app);
-var http = require('http').createServer(app)
-var io = require('socket.io')(http, {
+import { Server, Socket } from 'socket.io'
+import express, { Express, Request, Response } from 'express'
+import { clearInterval } from 'timers'
+import { createServer } from 'http'
+import { v4 } from 'uuid'
+import cors from 'cors'
+import { SocketEventTypes } from './types'
+
+var app: Express = express()
+var http = createServer(app)
+var io = new Server(http, {
   cors: {
     origin: '*',
   },
 })
 
-var uuidv4 = require('uuid').v4
-const cors = require('cors')
-const { SocketEventTypes } = require('./types')
-const { clearInterval } = require('timers')
 const port = 5000
 
-let usedLettersByRoomId = {}
-let playersByRoomId = {}
-let roomCountdowns = {}
+type PlayersByRoomId = {
+  [roomId: string]: string[]
+}
+
+type UsedLettersByRoomId = {
+  [roomId: string]: {
+    [letter: string]: boolean
+  }
+}
+
+type CountdownByRoomId = {
+  [roomId: string]: {
+    intervalId: NodeJS.Timer | undefined
+    countdown: number
+  }
+}
+
+let usedLettersByRoomId: UsedLettersByRoomId = {}
+let playersByRoomId: PlayersByRoomId = {}
+let roomCountdowns: CountdownByRoomId = {}
 
 app.use(cors({ origin: '*' }))
 app.use(express.json())
 
 // Create new game room
 app.post('/room', function (req, res, next) {
-  const id = uuidv4()
+  const id = v4()
   if (Boolean(usedLettersByRoomId[id])) {
     res.status(400)
     return
   }
   usedLettersByRoomId[id] = {}
   roomCountdowns[id] = {
-    intervalId: '',
+    intervalId: undefined,
     countdown: 10,
   }
   const response = {
@@ -41,7 +60,7 @@ app.post('/room', function (req, res, next) {
 })
 
 // Join existing game room
-app.get('/room/:roomId', function (req, res, next) {
+app.get('/room/:roomId', function (req: Request, res: Response) {
   const roomId = req.params.roomId
   const response = {
     id: roomId,
@@ -50,7 +69,7 @@ app.get('/room/:roomId', function (req, res, next) {
   res.json(response)
 })
 
-io.on('connection', function (socket) {
+io.on('connection', function (socket: Socket) {
   const clientIpAddress = socket.client.conn.remoteAddress
   console.log(`client with ip address=${clientIpAddress} connected`)
 
@@ -58,7 +77,7 @@ io.on('connection', function (socket) {
     console.log(`client with ip address=${clientIpAddress} disconnected`)
   )
 
-  socket.on(SocketEventTypes.JoinRoom, (roomId) => {
+  socket.on(SocketEventTypes.JoinRoom, (roomId: string) => {
     console.log(
       `client with ip address=${clientIpAddress} joining room id=${roomId}`
     )
@@ -71,7 +90,7 @@ io.on('connection', function (socket) {
     handleCountdown(socket, roomId)
   })
 
-  socket.on(SocketEventTypes.SelectLetter, function (msg) {
+  socket.on(SocketEventTypes.SelectLetter, function (msg: any) {
     var { roomId, letter } = JSON.parse(msg)
     console.debug(
       `message received from client with ip address=${clientIpAddress} for room=${roomId}, msg=${letter}`
@@ -83,7 +102,7 @@ io.on('connection', function (socket) {
     emitToRoom(socket, roomId, SocketEventTypes.LetterSelected, usedLetters)
   })
 
-  socket.on(SocketEventTypes.EndTurn, function (msg) {
+  socket.on(SocketEventTypes.EndTurn, function (msg: any) {
     var { roomId, player } = JSON.parse(msg)
     var nextPlayerIndex = playersByRoomId[roomId].indexOf(player) + 1
     if (nextPlayerIndex > playersByRoomId[roomId].length - 1) {
@@ -93,9 +112,9 @@ io.on('connection', function (socket) {
     emitToRoom(socket, roomId, SocketEventTypes.StartTurn, nextPlayer)
   })
 
-  socket.on(SocketEventTypes.ResetTimer, (msg) => {
+  socket.on(SocketEventTypes.ResetTimer, (msg: any) => {
     var { roomId } = JSON.parse(msg)
-    roomCountdowns[roomId].intervalId = ''
+    roomCountdowns[roomId].intervalId = undefined
     roomCountdowns[roomId].countdown = 10
     handleCountdown(socket, roomId)
   })
@@ -105,14 +124,19 @@ http.listen(port, function () {
   console.log(`listening on *:${port}`)
 })
 
-const getRoomUsedLetters = (roomId) => {
+const getRoomUsedLetters = (roomId: string) => {
   if (!Boolean(usedLettersByRoomId[roomId])) {
     usedLettersByRoomId[roomId] = {}
   }
   return usedLettersByRoomId[roomId]
 }
 
-const emitToRoom = (socket, roomId, eventType, message) => {
+const emitToRoom = (
+  socket: Socket,
+  roomId: string,
+  eventType: string,
+  message: any
+) => {
   console.log(
     `emitting message type=${eventType} to room id=${roomId}`,
     message
@@ -124,7 +148,7 @@ const emitToRoom = (socket, roomId, eventType, message) => {
   socket.emit(eventType, message)
 }
 
-const addPlayerToRoom = (roomId, player) => {
+const addPlayerToRoom = (roomId: string, player: string) => {
   if (playersByRoomId[roomId]) {
     if (!playersByRoomId[roomId].includes(player)) {
       playersByRoomId[roomId].push(player)
@@ -136,7 +160,7 @@ const addPlayerToRoom = (roomId, player) => {
   }
 }
 
-const handleCountdown = (socket, roomId) => {
+const handleCountdown = (socket: Socket, roomId: string) => {
   roomCountdowns[roomId].intervalId = setInterval(() => {
     roomCountdowns[roomId].countdown--
     emitToRoom(socket, roomId, SocketEventTypes.CountdownTick, {
