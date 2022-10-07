@@ -50,6 +50,7 @@ export class Room {
     return this.usedLetters
   }
   resetCountdown = () => {
+    clearInterval(this.countdown.timer)
     this.countdown = { timer: undefined, time: 10 }
   }
 }

@@ -91,6 +91,7 @@ io.on('connection', function (socket: Socket) {
       nextPlayerIndex = 0
     }
     var nextPlayer = roomPlayerIds[nextPlayerIndex]
+    room.resetCountdown()
     emitToRoom(socket, roomId, SocketEventTypes.StartTurn, nextPlayer)
   })
 
