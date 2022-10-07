@@ -8,8 +8,9 @@ var io = require('socket.io')(http, {
   },
 })
 
-const cors = require('cors')
 var uuidv4 = require('uuid').v4
+const cors = require('cors')
+const { SocketEventTypes } = require('./types')
 const port = 5000
 
 let usedLettersByRoomId = {}
@@ -50,14 +51,20 @@ io.on('connection', function (socket) {
     console.log(`client with ip address=${clientIpAddress} disconnected`)
   )
 
-  socket.on('join-room', (roomId) => {
+  socket.on(SocketEventTypes.JoinRoom, (roomId) => {
     console.log(
       `client with ip address=${clientIpAddress} joining room id=${roomId}`
     )
     socket.join(`${roomId}`)
+    emitToRoom(
+      socket,
+      roomId,
+      SocketEventTypes.RoomJoined,
+      getRoomUsedLetters(roomId)
+    )
   })
 
-  socket.on('select-letter', function (msg) {
+  socket.on(SocketEventTypes.SelectLetter, function (msg) {
     var { roomId, letter } = JSON.parse(msg)
     console.debug(
       `message received from client with ip address=${clientIpAddress} for room=${roomId}, msg=${letter}`
@@ -66,11 +73,7 @@ io.on('connection', function (socket) {
     const usedLetters = getRoomUsedLetters(roomId)
     usedLetters[letter] = !Boolean(usedLetters[letter])
 
-    // emit message to room
-    socket.to(`${roomId}`).emit('letter-selected', usedLetters)
-
-    // emit message to sender
-    socket.emit('letter-selected', usedLetters)
+    emitToRoom(socket, roomId, SocketEventTypes.LetterSelected, usedLetters)
   })
 })
 
@@ -83,4 +86,12 @@ const getRoomUsedLetters = (roomId) => {
     usedLettersByRoomId[roomId] = {}
   }
   return usedLettersByRoomId[roomId]
+}
+
+const emitToRoom = (socket, roomId, eventType, message) => {
+  // emit message to room
+  socket.to(`${roomId}`).emit(eventType, message)
+
+  // emit message to sender
+  socket.emit(eventType, message)
 }
