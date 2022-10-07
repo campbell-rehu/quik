@@ -35,13 +35,11 @@ export const InGame: React.FC<Props> = ({ hardMode }) => {
   const [resetTimer, setResetTimer] = useState<boolean>(false)
   const [currentPlayer, setCurrentPlayer] = useState<string>('')
   const toggleSelectLetter = (letter: string) => {
-    if (currentPlayer === socket?.id) {
-      if (letterSet[letter]) {
-        socket?.emit(
-          SocketEventType.SelectLetter,
-          JSON.stringify({ roomId, letter })
-        )
-      }
+    if (letterSet[letter]) {
+      socket?.emit(
+        SocketEventType.SelectLetter,
+        JSON.stringify({ roomId, letter })
+      )
     }
   }
 
@@ -93,7 +91,7 @@ export const InGame: React.FC<Props> = ({ hardMode }) => {
       window.removeEventListener('keydown', handleKeyDown)
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [socket])
+  }, [socket, roomId])
 
   if (!roomId) {
     return (
