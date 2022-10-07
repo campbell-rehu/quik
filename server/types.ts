@@ -1,4 +1,4 @@
-const SocketEventTypes = {
+export const SocketEventTypes = {
   JoinRoom: 'join-room',
   RoomJoined: 'room-joined',
   SelectLetter: 'select-letter',
@@ -7,8 +7,4 @@ const SocketEventTypes = {
   StartTurn: 'start-turn',
   CountdownTick: 'tick',
   ResetTimer: 'reset-timer',
-}
-
-module.exports = {
-  SocketEventTypes,
 }
