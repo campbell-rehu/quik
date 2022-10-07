@@ -62,6 +62,7 @@ export const DefaultTurnDuration = 10000
 
 export enum SocketEventType {
   JoinRoom = 'join-room',
+  RoomJoined = 'room-joined',
   SelectLetter = 'select-letter',
   LetterSelected = 'letter-selected',
 }

@@ -10,6 +10,7 @@ import {
   WebSocketContextProvider,
 } from './WebsocketContext'
 import { Room } from './Room'
+import { useRoomContext } from './RoomContext'
 
 interface Props {
   hardMode?: boolean
@@ -24,14 +25,10 @@ export const InGameContainer: React.FC<PropsWithChildren> = ({ children }) => {
 }
 
 export const InGame: React.FC<Props> = ({ hardMode }) => {
-  const {
-    socket,
-    roomId,
-    createRoom,
-    joinRoom,
-    usedLetters: usedLettersInit,
-  } = useWebSocketContext()
-  const [usedLetters, setUsedLetters] = useState<BooleanMap>(usedLettersInit)
+  const { socket } = useWebSocketContext()
+  const { roomId, createRoom, joinRoom } = useRoomContext()
+
+  const [usedLetters, setUsedLetters] = useState<BooleanMap>({})
   const [letterSet, setLetterSet] = useState<BooleanMap>(
     StringArrayToBooleanMap(Object.values(LettersEasy))
   )
@@ -54,18 +51,21 @@ export const InGame: React.FC<Props> = ({ hardMode }) => {
   }
 
   useEffect(() => {
-    socket?.on(SocketEventType.LetterSelected, (letter) => {
-      setUsedLetters(letter)
+    socket?.on(SocketEventType.LetterSelected, (usedLetters) => {
+      setUsedLetters(usedLetters)
+    })
+    socket?.on(SocketEventType.RoomJoined, (usedLetters) => {
+      setUsedLetters(usedLetters)
     })
     return () => {
       socket?.off(SocketEventType.LetterSelected)
+      socket?.off(SocketEventType.RoomJoined)
     }
   }, [socket])
 
   useEffect(() => setResetTimer(false), [resetTimer])
 
   useEffect(() => {
-    window.addEventListener('keydown', handleKeyDown)
     if (hardMode) {
       setLetterSet(StringArrayToBooleanMap(Object.values(LettersHard)))
     }
@@ -73,8 +73,12 @@ export const InGame: React.FC<Props> = ({ hardMode }) => {
   }, [hardMode])
 
   useEffect(() => {
-    setUsedLetters(usedLettersInit)
-  }, [usedLettersInit])
+    window.addEventListener('keydown', handleKeyDown)
+    return () => {
+      window.removeEventListener('keydown', handleKeyDown)
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [socket])
 
   if (!roomId) {
     return (
