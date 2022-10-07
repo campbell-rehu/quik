@@ -14,6 +14,7 @@ const { SocketEventTypes } = require('./types')
 const port = 5000
 
 let usedLettersByRoomId = {}
+let playersByRoomId = {}
 
 app.use(cors({ origin: '*' }))
 app.use(express.json())
@@ -56,12 +57,11 @@ io.on('connection', function (socket) {
       `client with ip address=${clientIpAddress} joining room id=${roomId}`
     )
     socket.join(`${roomId}`)
-    emitToRoom(
-      socket,
-      roomId,
-      SocketEventTypes.RoomJoined,
-      getRoomUsedLetters(roomId)
-    )
+    addPlayerToRoom(roomId, socket.id)
+    emitToRoom(socket, roomId, SocketEventTypes.RoomJoined, {
+      usedLetters: getRoomUsedLetters(roomId),
+      currentPlayer: playersByRoomId[roomId][0],
+    })
   })
 
   socket.on(SocketEventTypes.SelectLetter, function (msg) {
@@ -74,6 +74,16 @@ io.on('connection', function (socket) {
     usedLetters[letter] = !Boolean(usedLetters[letter])
 
     emitToRoom(socket, roomId, SocketEventTypes.LetterSelected, usedLetters)
+  })
+
+  socket.on(SocketEventTypes.EndTurn, function (msg) {
+    var { roomId, player } = JSON.parse(msg)
+    var nextPlayerIndex = playersByRoomId[roomId].indexOf(player) + 1
+    if (nextPlayerIndex > playersByRoomId[roomId].length - 1) {
+      nextPlayerIndex = 0
+    }
+    var nextPlayer = playersByRoomId[roomId][nextPlayerIndex]
+    emitToRoom(socket, roomId, SocketEventTypes.StartTurn, nextPlayer)
   })
 })
 
@@ -89,9 +99,25 @@ const getRoomUsedLetters = (roomId) => {
 }
 
 const emitToRoom = (socket, roomId, eventType, message) => {
+  console.log(
+    `emitting message type=${eventType} to room id=${roomId}`,
+    message
+  )
   // emit message to room
   socket.to(`${roomId}`).emit(eventType, message)
 
   // emit message to sender
   socket.emit(eventType, message)
+}
+
+const addPlayerToRoom = (roomId, player) => {
+  if (playersByRoomId[roomId]) {
+    if (!playersByRoomId[roomId].includes(player)) {
+      playersByRoomId[roomId].push(player)
+    } else {
+      console.log(`Player id=${player} is already in the room id=${roomId}`)
+    }
+  } else {
+    playersByRoomId[roomId] = [player]
+  }
 }
