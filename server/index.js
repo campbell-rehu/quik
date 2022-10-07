@@ -11,10 +11,12 @@ var io = require('socket.io')(http, {
 var uuidv4 = require('uuid').v4
 const cors = require('cors')
 const { SocketEventTypes } = require('./types')
+const { clearInterval } = require('timers')
 const port = 5000
 
 let usedLettersByRoomId = {}
 let playersByRoomId = {}
+let roomCountdowns = {}
 
 app.use(cors({ origin: '*' }))
 app.use(express.json())
@@ -27,6 +29,10 @@ app.post('/room', function (req, res, next) {
     return
   }
   usedLettersByRoomId[id] = {}
+  roomCountdowns[id] = {
+    intervalId: '',
+    countdown: 10,
+  }
   const response = {
     id,
     usedLetters: usedLettersByRoomId[id],
@@ -62,6 +68,7 @@ io.on('connection', function (socket) {
       usedLetters: getRoomUsedLetters(roomId),
       currentPlayer: playersByRoomId[roomId][0],
     })
+    handleCountdown(socket, roomId)
   })
 
   socket.on(SocketEventTypes.SelectLetter, function (msg) {
@@ -84,6 +91,13 @@ io.on('connection', function (socket) {
     }
     var nextPlayer = playersByRoomId[roomId][nextPlayerIndex]
     emitToRoom(socket, roomId, SocketEventTypes.StartTurn, nextPlayer)
+  })
+
+  socket.on('reset-timer', (msg) => {
+    var { roomId } = JSON.parse(msg)
+    roomCountdowns[roomId].intervalId = ''
+    roomCountdowns[roomId].countdown = 10
+    handleCountdown(socket, roomId)
   })
 })
 
@@ -120,4 +134,16 @@ const addPlayerToRoom = (roomId, player) => {
   } else {
     playersByRoomId[roomId] = [player]
   }
+}
+
+const handleCountdown = (socket, roomId) => {
+  roomCountdowns[roomId].intervalId = setInterval(() => {
+    roomCountdowns[roomId].countdown--
+    emitToRoom(socket, roomId, SocketEventTypes.CountdownTick, {
+      countdown: roomCountdowns[roomId].countdown,
+    })
+    if (roomCountdowns[roomId].countdown === 0) {
+      clearInterval(roomCountdowns[roomId].intervalId)
+    }
+  }, 1000)
 }

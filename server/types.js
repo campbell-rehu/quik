@@ -5,6 +5,7 @@ const SocketEventTypes = {
   LetterSelected: 'letter-selected',
   EndTurn: 'end-turn',
   StartTurn: 'start-turn',
+  CountdownTick: 'tick',
 }
 
 module.exports = {
