@@ -6,6 +6,7 @@ const SocketEventTypes = {
   EndTurn: 'end-turn',
   StartTurn: 'start-turn',
   CountdownTick: 'tick',
+  ResetTimer: 'reset-timer',
 }
 
 module.exports = {

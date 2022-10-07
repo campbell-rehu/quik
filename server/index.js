@@ -93,7 +93,7 @@ io.on('connection', function (socket) {
     emitToRoom(socket, roomId, SocketEventTypes.StartTurn, nextPlayer)
   })
 
-  socket.on('reset-timer', (msg) => {
+  socket.on(SocketEventTypes.ResetTimer, (msg) => {
     var { roomId } = JSON.parse(msg)
     roomCountdowns[roomId].intervalId = ''
     roomCountdowns[roomId].countdown = 10
