@@ -43,7 +43,6 @@ app.get('/room/:roomId', (req: Request, res: Response) => {
     id: room.getId(),
     usedLetters: room.getUsedLetters(),
   }
-  console.log({ response })
   res.json(response)
 })
 

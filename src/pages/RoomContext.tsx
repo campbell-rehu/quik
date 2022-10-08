@@ -68,7 +68,6 @@ export const RoomContextProvider: React.FC<Props & PropsWithChildren> = ({
     })
     const json = await response.json()
     setPlayerNameLocal(json.playerName)
-    console.log(json.playerName, socket)
     socket?.emit(SocketEventType.JoinRoom, roomId)
   }
 

@@ -61,7 +61,6 @@ export const Room: React.FC<Props> = ({ roomId, socket, hardMode = false }) => {
     })
     socket.on(SocketEventType.RoomJoined, ({ usedLetters, currentPlayer }) => {
       setUsedLetters(usedLetters)
-      console.log({ currentPlayer })
       setCurrentPlayer(currentPlayer)
     })
     socket.on(SocketEventType.StartTurn, (currentPlayer) => {
