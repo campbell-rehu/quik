@@ -20,21 +20,27 @@ export const Room: React.FC<Props> = ({ roomId, socket, hardMode = false }) => {
   )
   const [resetTimer, setResetTimer] = useState<boolean>(false)
   const [currentPlayer, setCurrentPlayer] = useState<string>('')
+  const isThisCurrentPlayer = () => socket.id === currentPlayer
+
   const toggleSelectLetter = (letter: string) => {
-    if (letterSet[letter]) {
-      socket.emit(
-        SocketEventType.SelectLetter,
-        JSON.stringify({ roomId, letter })
-      )
+    if (isThisCurrentPlayer()) {
+      if (letterSet[letter]) {
+        socket.emit(
+          SocketEventType.SelectLetter,
+          JSON.stringify({ roomId, letter })
+        )
+      }
     }
   }
 
   const endTurn = () => {
-    setResetTimer(true)
-    socket.emit(
-      SocketEventType.EndTurn,
-      JSON.stringify({ roomId, player: socket.id })
-    )
+    if (isThisCurrentPlayer()) {
+      setResetTimer(true)
+      socket.emit(
+        SocketEventType.EndTurn,
+        JSON.stringify({ roomId, player: socket.id })
+      )
+    }
   }
 
   const handleKeyDown = (e: KeyboardEvent) => {

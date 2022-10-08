@@ -66,7 +66,7 @@ io.on('connection', function (socket: Socket) {
 
     emitToRoom(socket, roomId, SocketEventTypes.RoomJoined, {
       usedLetters: room.getUsedLetters(),
-      currentPlayer: Object.keys(room.getPlayers())[0],
+      currentPlayer: room.getCurrentPlayer().id,
     })
 
     handleCountdown(socket, room)
@@ -126,6 +126,10 @@ const emitToRoom = (
 
 const handleCountdown = (socket: Socket, room: Room) => {
   const countdown = room.getCountdown()
+  if (countdown.started) {
+    return
+  }
+  countdown.started = true
   countdown.timer = setInterval(() => {
     countdown.time--
     emitToRoom(socket, room.getId(), SocketEventTypes.CountdownTick, {
