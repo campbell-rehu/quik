@@ -13,3 +13,9 @@ export enum Routes {
 export type BooleanMap = {
   [key: string]: boolean
 }
+
+export type Player = {
+  id: string
+  name: string
+  isTurn: boolean
+}

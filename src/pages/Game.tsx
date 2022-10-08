@@ -21,7 +21,8 @@ export const GameContainer: React.FC<PropsWithChildren> = ({ children }) => {
 
 export const Setup: React.FC<Props> = ({ hardMode }) => {
   const { socket } = useWebSocketContext()
-  const { roomId, createRoom, joinRoom } = useRoomContext()
+  const { roomId, playerName, createRoom, joinRoom, setPlayerName } =
+    useRoomContext()
 
   if (!socket) {
     return <div>Loading...</div>
@@ -55,6 +56,24 @@ export const Setup: React.FC<Props> = ({ hardMode }) => {
           </button>
         </div>
       </>
+    )
+  }
+
+  if (!playerName) {
+    return (
+      <div className='set-player-name-container'>
+        <input id='player-name' name='player-name' type='text' />
+        <button
+          type='button'
+          onClick={(e) => {
+            var input = document.querySelector(
+              '#player-name'
+            ) as HTMLInputElement
+            setPlayerName(roomId, socket.id, input.value)
+          }}>
+          Set Player Name
+        </button>
+      </div>
     )
   }
 

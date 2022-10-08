@@ -22,7 +22,7 @@ app.use(express.json())
 let rooms = new Rooms()
 
 // Create new game room
-app.post('/room', function (req: Request, res: Response) {
+app.post('/room', (req: Request, res: Response) => {
   const room = rooms.initialiseNewRoom()
   const response = {
     id: room.getId(),
@@ -32,7 +32,7 @@ app.post('/room', function (req: Request, res: Response) {
 })
 
 // Join existing game room
-app.get('/room/:roomId', function (req: Request, res: Response) {
+app.get('/room/:roomId', (req: Request, res: Response) => {
   const roomId = req.params.roomId
   const room = rooms.getRoom(roomId)
   if (!room) {
@@ -46,7 +46,17 @@ app.get('/room/:roomId', function (req: Request, res: Response) {
   res.json(response)
 })
 
-io.on('connection', function (socket: Socket) {
+// Sets the name of the player with the given playerId
+app.post('/player/:playerId/name', (req: Request, res: Response) => {
+  const playerId = req.params.playerId
+  const { roomId, playerName } = req.body
+
+  const room = rooms.getRoom(roomId)
+  room.addPlayer(playerId, playerName)
+  res.json({ playerName })
+})
+
+io.on('connection', (socket: Socket) => {
   const clientIpAddress = socket.client.conn.remoteAddress
   console.log(`client with ip address=${clientIpAddress} connected`)
 
@@ -58,21 +68,20 @@ io.on('connection', function (socket: Socket) {
     console.log(
       `client with ip address=${clientIpAddress} joining room id=${roomId}`
     )
+
     socket.join(`${roomId}`)
 
     const room = rooms.getRoom(roomId)
 
-    room.addPlayer(socket.id)
-
     emitToRoom(socket, roomId, SocketEventTypes.RoomJoined, {
       usedLetters: room.getUsedLetters(),
-      currentPlayer: room.getCurrentPlayer().id,
+      currentPlayer: room.getCurrentPlayer(),
     })
 
     handleCountdown(socket, room)
   })
 
-  socket.on(SocketEventTypes.SelectLetter, function (msg: any) {
+  socket.on(SocketEventTypes.SelectLetter, (msg: any) => {
     var { roomId, letter } = JSON.parse(msg)
     console.debug(
       `message received from client with ip address=${clientIpAddress} for room=${roomId}, msg=${letter}`
@@ -82,17 +91,17 @@ io.on('connection', function (socket: Socket) {
     emitToRoom(socket, roomId, SocketEventTypes.LetterSelected, usedLetters)
   })
 
-  socket.on(SocketEventTypes.EndTurn, function (msg: any) {
-    var { roomId, player } = JSON.parse(msg)
+  socket.on(SocketEventTypes.EndTurn, (msg: any) => {
+    var { roomId } = JSON.parse(msg)
     const room = rooms.getRoom(roomId)
-    const roomPlayerIds = Object.keys(room.getPlayers())
-    var nextPlayerIndex = roomPlayerIds.indexOf(player) + 1
-    if (nextPlayerIndex > roomPlayerIds.length - 1) {
-      nextPlayerIndex = 0
-    }
-    var nextPlayer = roomPlayerIds[nextPlayerIndex]
+    room.setNextPlayer()
     room.resetCountdown()
-    emitToRoom(socket, roomId, SocketEventTypes.StartTurn, nextPlayer)
+    emitToRoom(
+      socket,
+      roomId,
+      SocketEventTypes.StartTurn,
+      room.getCurrentPlayer()
+    )
   })
 
   socket.on(SocketEventTypes.ResetTimer, (msg: any) => {
@@ -103,7 +112,7 @@ io.on('connection', function (socket: Socket) {
   })
 })
 
-http.listen(port, function () {
+http.listen(port, () => {
   console.log(`listening on *:${port}`)
 })
 
