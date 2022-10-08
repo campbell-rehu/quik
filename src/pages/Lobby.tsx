@@ -7,7 +7,7 @@ export const Lobby: React.FC<{}> = () => {
     <>
       <h1>This is the lobby</h1>
       <Button to={Page.Splash} label='Back' />
-      <Button to={Page.InGame} label='Play' />
+      <Button to={Page.Game} label='Play' />
     </>
   )
 }

@@ -1,13 +1,13 @@
 export enum Page {
   Splash = 'Splash',
   Lobby = 'Lobby',
-  InGame = 'InGame',
+  Game = 'Game',
 }
 
 export enum Routes {
   Splash = '/splash',
   Lobby = '/lobby',
-  InGame = '/ingame',
+  Game = '/game',
 }
 
 export type BooleanMap = {
