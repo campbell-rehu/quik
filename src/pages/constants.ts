@@ -65,4 +65,5 @@ export enum SocketEventType {
   LetterSelected = 'letter-selected',
   EndTurn = 'end-turn',
   StartTurn = 'start-turn',
+  LeaveRoom = 'leave-room',
 }

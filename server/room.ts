@@ -14,6 +14,12 @@ export class Rooms {
     this.rooms[id] = new Room(id)
     return this.rooms[id]
   }
+
+  removeRoom = (roomId: string) => {
+    if (Boolean(this.rooms[roomId])) {
+      delete this.rooms[roomId]
+    }
+  }
 }
 
 export class Room {
@@ -53,6 +59,7 @@ export class Room {
   getCountdown = () => this.countdown
   getCurrentPlayer = () =>
     this.players[Object.keys(this.players)[this.currentPlayerIndex]]
+  getNumberOfPlayers = () => Object.keys(this.players).length
 
   addPlayer = (
     playerId: string,
@@ -91,5 +98,10 @@ export class Room {
     var nextPlayer = playerIds[nextPlayerIndex]
     this.players[nextPlayer].isTurn = true
     this.currentPlayerIndex = nextPlayerIndex
+  }
+  removePlayer = (playerId: string) => {
+    if (Boolean(this.players[playerId])) {
+      delete this.players[playerId]
+    }
   }
 }
