@@ -96,7 +96,7 @@ io.on('connection', (socket: Socket) => {
     const room = rooms.getRoom(roomId)
     room.setNextPlayer()
     room.resetCountdown()
-    room.setUsedLetters(selectedLetter)
+    room.setLetterUnselectable(selectedLetter)
     emitToRoom(
       socket,
       roomId,

@@ -90,7 +90,7 @@ export class Room {
       time: 10,
     }
   }
-  setUsedLetters = (letter: string) => {
+  setLetterUnselectable = (letter: string) => {
     this.usedLetters[letter] = false
   }
   setNextPlayer = () => {
