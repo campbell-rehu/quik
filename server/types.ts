@@ -7,4 +7,5 @@ export const SocketEventTypes = {
   StartTurn: 'start-turn',
   CountdownTick: 'tick',
   ResetTimer: 'reset-timer',
+  LeaveRoom: 'leave-room',
 }

@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from 'react'
+import React, { MouseEvent, useEffect, useState } from 'react'
 import { Socket } from 'socket.io-client'
 import { Button } from './Button'
 import { LettersEasy, SocketEventType, LettersHard } from './constants'
@@ -89,9 +89,16 @@ export const Room: React.FC<Props> = ({ roomId, socket, hardMode = false }) => {
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [socket, roomId])
 
+  const handleLeaveRoom = (e: MouseEvent) => {
+    socket.emit(
+      SocketEventType.LeaveRoom,
+      JSON.stringify({ roomId, playerId: socket.id })
+    )
+  }
+
   return (
     <section>
-      <Button to={Page.Lobby} label='Back' />
+      <Button to={Page.Lobby} label='Leave Room' onClick={handleLeaveRoom} />
       <h1>Game room: {roomId}</h1>
       <Timer reset={resetTimer} />
       <div className='letters-container'>

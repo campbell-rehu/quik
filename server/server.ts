@@ -110,6 +110,19 @@ io.on('connection', (socket: Socket) => {
     room.resetCountdown()
     handleCountdown(socket, room)
   })
+
+  socket.on(SocketEventTypes.LeaveRoom, (msg: any) => {
+    var { roomId, playerId } = JSON.parse(msg)
+    // remove player from room
+    const room = rooms.getRoom(roomId)
+    room.removePlayer(playerId)
+
+    // if no players remain in the room, clear the countdown and remove the room
+    if (room.getNumberOfPlayers() === 0) {
+      room.resetCountdown()
+      rooms.removeRoom(roomId)
+    }
+  })
 })
 
 http.listen(port, () => {
