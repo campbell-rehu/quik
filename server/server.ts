@@ -116,12 +116,12 @@ io.on('connection', (socket: Socket) => {
     // remove player from room
     const room = rooms.getRoom(roomId)
     room.removePlayer(playerId)
-
     // if no players remain in the room, clear the countdown and remove the room
     if (room.getNumberOfPlayers() === 0) {
       room.resetCountdown()
       rooms.removeRoom(roomId)
     }
+    // TODO: handle setting player turn if current player leaves the room
   })
 })
 
