@@ -90,5 +90,6 @@ export class Room {
     }
     var nextPlayer = playerIds[nextPlayerIndex]
     this.players[nextPlayer].isTurn = true
+    this.currentPlayerIndex = nextPlayerIndex
   }
 }

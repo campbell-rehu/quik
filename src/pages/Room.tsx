@@ -5,7 +5,7 @@ import { LettersEasy, SocketEventType, LettersHard } from './constants'
 import { StringArrayToBooleanMap } from './helpers'
 import { Letter } from './Letter'
 import { Timer } from './Timer'
-import { BooleanMap, Page } from './types'
+import { BooleanMap, Page, Player } from './types'
 
 interface Props {
   roomId: string
@@ -19,8 +19,12 @@ export const Room: React.FC<Props> = ({ roomId, socket, hardMode = false }) => {
     StringArrayToBooleanMap(Object.values(LettersEasy))
   )
   const [resetTimer, setResetTimer] = useState<boolean>(false)
-  const [currentPlayer, setCurrentPlayer] = useState<string>('')
-  const isThisCurrentPlayer = () => socket.id === currentPlayer
+  const [currentPlayer, setCurrentPlayer] = useState<Player>({
+    id: socket.id,
+    name: 'Player',
+    isTurn: false,
+  })
+  const isThisCurrentPlayer = () => socket.id === currentPlayer.id
 
   const toggleSelectLetter = (letter: string) => {
     if (isThisCurrentPlayer()) {
@@ -38,7 +42,7 @@ export const Room: React.FC<Props> = ({ roomId, socket, hardMode = false }) => {
       setResetTimer(true)
       socket.emit(
         SocketEventType.EndTurn,
-        JSON.stringify({ roomId, player: socket.id })
+        JSON.stringify({ roomId, player: currentPlayer.id })
       )
     }
   }
@@ -57,6 +61,7 @@ export const Room: React.FC<Props> = ({ roomId, socket, hardMode = false }) => {
     })
     socket.on(SocketEventType.RoomJoined, ({ usedLetters, currentPlayer }) => {
       setUsedLetters(usedLetters)
+      console.log({ currentPlayer })
       setCurrentPlayer(currentPlayer)
     })
     socket.on(SocketEventType.StartTurn, (currentPlayer) => {
@@ -101,7 +106,7 @@ export const Room: React.FC<Props> = ({ roomId, socket, hardMode = false }) => {
         ))}
       </div>
       <div className='topic-container'>Children's songs</div>
-      <div className='turn-container'>{currentPlayer}'s turn</div>
+      <div className='turn-container'>{currentPlayer.name}'s turn</div>
       <button onClick={endTurn}>End Turn</button>
     </section>
   )
