@@ -24,11 +24,13 @@ export const Room: React.FC<Props> = ({ roomId, socket, hardMode = false }) => {
     name: 'Player',
     isTurn: false,
   })
+  const [selectedLetter, setSelectedLetter] = useState<string>('')
   const isThisCurrentPlayer = () => socket.id === currentPlayer.id
 
   const toggleSelectLetter = (letter: string) => {
     if (isThisCurrentPlayer()) {
       if (letterSet[letter]) {
+        setSelectedLetter(letter)
         socket.emit(
           SocketEventType.SelectLetter,
           JSON.stringify({ roomId, letter })
@@ -42,7 +44,7 @@ export const Room: React.FC<Props> = ({ roomId, socket, hardMode = false }) => {
       setResetTimer(true)
       socket.emit(
         SocketEventType.EndTurn,
-        JSON.stringify({ roomId, player: currentPlayer.id })
+        JSON.stringify({ roomId, selectedLetter })
       )
     }
   }
@@ -50,7 +52,7 @@ export const Room: React.FC<Props> = ({ roomId, socket, hardMode = false }) => {
   const handleKeyDown = (e: KeyboardEvent) => {
     var key = e.key
     toggleSelectLetter(key.toLocaleUpperCase())
-    if (key === ' ') {
+    if (key === 'Enter') {
       endTurn()
     }
   }
@@ -96,6 +98,18 @@ export const Room: React.FC<Props> = ({ roomId, socket, hardMode = false }) => {
     )
   }
 
+  const isLetterSeletable = (letter: string) => {
+    return letter in usedLetters && usedLetters[letter] === true
+  }
+
+  const isLetterUsed = (letter: string) => {
+    return letter in usedLetters
+  }
+
+  const canSelectLetter = (letter: string) => {
+    return isLetterSeletable(letter) || !isLetterUsed(letter)
+  }
+
   return (
     <section>
       <Button to={Page.Lobby} label='Leave Room' onClick={handleLeaveRoom} />
@@ -106,7 +120,8 @@ export const Room: React.FC<Props> = ({ roomId, socket, hardMode = false }) => {
           <Letter
             key={letter}
             label={letter}
-            used={Boolean(usedLetters[letter])}
+            used={letter in usedLetters}
+            canSelect={canSelectLetter(letter)}
             toggleSelectLetter={toggleSelectLetter}
           />
         ))}

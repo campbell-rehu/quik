@@ -31,6 +31,9 @@ export class Room {
       isTurn: boolean
     }
   }
+  // The boolean in usedLetters denotes whether the letter can be de-selected
+  // This is the case when it is the current player's turn and they have not
+  // ended their turn yet
   private usedLetters: {
     [letter: string]: boolean
   }
@@ -61,10 +64,7 @@ export class Room {
     this.players[Object.keys(this.players)[this.currentPlayerIndex]]
   getNumberOfPlayers = () => Object.keys(this.players).length
 
-  addPlayer = (
-    playerId: string,
-    name: string = `${Object.keys(this.players).length + 1}`
-  ) => {
+  addPlayer = (playerId: string, name: string) => {
     this.players[playerId] = {
       id: playerId,
       name,
@@ -72,7 +72,14 @@ export class Room {
     }
   }
   addUsedLetter = (letter: string) => {
-    this.usedLetters[letter] = true
+    // if the letter is already used and its value is true, remove it from the list
+    if (letter in this.usedLetters) {
+      if (this.usedLetters[letter] === true) {
+        delete this.usedLetters[letter]
+      }
+    } else {
+      this.usedLetters[letter] = true
+    }
     return this.usedLetters
   }
   resetCountdown = () => {
@@ -82,6 +89,9 @@ export class Room {
       timer: undefined,
       time: 10,
     }
+  }
+  setUsedLetters = (letter: string) => {
+    this.usedLetters[letter] = false
   }
   setNextPlayer = () => {
     const playerIds = Object.keys(this.players)
