@@ -1,4 +1,10 @@
-import React, { MouseEvent, useEffect, useState } from 'react'
+import React, {
+  KeyboardEvent,
+  MouseEvent,
+  useEffect,
+  useRef,
+  useState,
+} from 'react'
 import { Socket } from 'socket.io-client'
 import { Button } from './Button'
 import { LettersEasy, SocketEventType, LettersHard } from './constants'
@@ -25,6 +31,7 @@ export const Room: React.FC<Props> = ({ roomId, socket, hardMode = false }) => {
     isTurn: false,
   })
   const [selectedLetter, setSelectedLetter] = useState<string>('')
+  const sectionRef = useRef<HTMLElement>(null)
   const isThisCurrentPlayer = () => socket.id === currentPlayer.id
   const canSelectLetter = (letter: string) =>
     isLetterSeletable(letter) || !isLetterUsed(letter)
@@ -44,7 +51,7 @@ export const Room: React.FC<Props> = ({ roomId, socket, hardMode = false }) => {
     ) {
       return
     }
-    setSelectedLetter(letter)
+    setSelectedLetter((prev) => (prev === letter ? '' : letter))
     socket.emit(
       SocketEventType.SelectLetter,
       JSON.stringify({ roomId, letter })
@@ -52,24 +59,12 @@ export const Room: React.FC<Props> = ({ roomId, socket, hardMode = false }) => {
   }
 
   const endTurn = () => {
-    if (isThisCurrentPlayer()) {
+    if (socket.id === currentPlayer.id) {
       setResetTimer(true)
       socket.emit(
         SocketEventType.EndTurn,
         JSON.stringify({ roomId, selectedLetter })
       )
-    }
-  }
-
-  // eslint-disable-next-line react-hooks/exhaustive-deps
-  const handleKeyDown = (e: KeyboardEvent) => {
-    var key = e.key
-    if (key === 'Enter') {
-      endTurn()
-    } else {
-      var keyUpper = key.toUpperCase()
-      setSelectedLetter(keyUpper)
-      toggleSelectLetter(keyUpper)
     }
   }
 
@@ -90,7 +85,19 @@ export const Room: React.FC<Props> = ({ roomId, socket, hardMode = false }) => {
     }
   }, [socket])
 
+  const handleKeyDown = (e: KeyboardEvent) => {
+    var key = e.key
+    if (key === 'Enter') {
+      endTurn()
+    } else {
+      var keyUpper = key.toUpperCase()
+      toggleSelectLetter(keyUpper)
+    }
+  }
+
   useEffect(() => setResetTimer(false), [resetTimer])
+
+  useEffect(() => sectionRef.current?.focus(), [sectionRef])
 
   useEffect(() => {
     if (hardMode) {
@@ -98,13 +105,6 @@ export const Room: React.FC<Props> = ({ roomId, socket, hardMode = false }) => {
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [hardMode])
-
-  useEffect(() => {
-    window.addEventListener('keydown', handleKeyDown)
-    return () => {
-      window.removeEventListener('keydown', handleKeyDown)
-    }
-  }, [socket, roomId, handleKeyDown])
 
   const handleLeaveRoom = (e: MouseEvent) => {
     socket.emit(
@@ -114,7 +114,7 @@ export const Room: React.FC<Props> = ({ roomId, socket, hardMode = false }) => {
   }
 
   return (
-    <section>
+    <section ref={sectionRef} tabIndex={0} onKeyDown={handleKeyDown}>
       <Button to={Page.Lobby} label='Leave Room' onClick={handleLeaveRoom} />
       <h1>Game room: {roomId}</h1>
       <Timer reset={resetTimer} />
