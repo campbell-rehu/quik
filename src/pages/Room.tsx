@@ -32,7 +32,9 @@ export const Room: React.FC<Props> = ({ roomId, socket, hardMode = false }) => {
   })
   const [selectedLetter, setSelectedLetter] = useState<string>('')
   const sectionRef = useRef<HTMLElement>(null)
+
   const isThisCurrentPlayer = () => socket.id === currentPlayer.id
+
   const canSelectLetter = (letter: string) =>
     isLetterSeletable(letter) || !isLetterUsed(letter)
 
@@ -68,6 +70,23 @@ export const Room: React.FC<Props> = ({ roomId, socket, hardMode = false }) => {
     }
   }
 
+  const handleKeyDown = (e: KeyboardEvent) => {
+    var key = e.key
+    if (key === 'Enter') {
+      endTurn()
+    } else {
+      var keyUpper = key.toUpperCase()
+      toggleSelectLetter(keyUpper)
+    }
+  }
+
+  const handleLeaveRoom = (e: MouseEvent) => {
+    socket.emit(
+      SocketEventType.LeaveRoom,
+      JSON.stringify({ roomId, playerId: socket.id })
+    )
+  }
+
   useEffect(() => {
     socket.on(SocketEventType.LetterSelected, (usedLetters) => {
       setUsedLetters(usedLetters)
@@ -85,16 +104,6 @@ export const Room: React.FC<Props> = ({ roomId, socket, hardMode = false }) => {
     }
   }, [socket])
 
-  const handleKeyDown = (e: KeyboardEvent) => {
-    var key = e.key
-    if (key === 'Enter') {
-      endTurn()
-    } else {
-      var keyUpper = key.toUpperCase()
-      toggleSelectLetter(keyUpper)
-    }
-  }
-
   useEffect(() => setResetTimer(false), [resetTimer])
 
   useEffect(() => sectionRef.current?.focus(), [sectionRef])
@@ -105,13 +114,6 @@ export const Room: React.FC<Props> = ({ roomId, socket, hardMode = false }) => {
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [hardMode])
-
-  const handleLeaveRoom = (e: MouseEvent) => {
-    socket.emit(
-      SocketEventType.LeaveRoom,
-      JSON.stringify({ roomId, playerId: socket.id })
-    )
-  }
 
   return (
     <section ref={sectionRef} tabIndex={0} onKeyDown={handleKeyDown}>
