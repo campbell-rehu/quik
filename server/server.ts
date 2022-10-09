@@ -101,7 +101,6 @@ io.on('connection', (socket: Socket) => {
     room.setNextPlayer()
     room.resetCountdown()
     room.setLetterUnselectable(selectedLetter)
-    console.log(room.getUsedLetters())
     emitToRoom(
       socket,
       roomId,
