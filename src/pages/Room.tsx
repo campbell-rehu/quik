@@ -53,16 +53,21 @@ export const Room: React.FC<Props> = ({ roomId, socket, hardMode = false }) => {
     ) {
       return
     }
+    let prevLetter = ''
+    if (selectedLetter !== letter) {
+      prevLetter = selectedLetter
+    }
     setSelectedLetter((prev) => (prev === letter ? '' : letter))
     socket.emit(
       SocketEventType.SelectLetter,
-      JSON.stringify({ roomId, letter })
+      JSON.stringify({ roomId, letter, prevLetter })
     )
   }
 
   const endTurn = () => {
     if (socket.id === currentPlayer.id) {
       setResetTimer(true)
+      setSelectedLetter('')
       socket.emit(
         SocketEventType.EndTurn,
         JSON.stringify({ roomId, selectedLetter })
