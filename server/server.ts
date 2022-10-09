@@ -82,11 +82,15 @@ io.on('connection', (socket: Socket) => {
   })
 
   socket.on(SocketEventTypes.SelectLetter, (msg: any) => {
-    var { roomId, letter } = JSON.parse(msg)
+    var { roomId, letter, prevLetter } = JSON.parse(msg)
     console.debug(
       `message received from client with ip address=${clientIpAddress} for room=${roomId}, msg=${letter}`
     )
-    var usedLetters = rooms.getRoom(roomId).addUsedLetter(letter)
+    const room = rooms.getRoom(roomId)
+    var usedLetters = room.addUsedLetter(letter)
+    if (prevLetter) {
+      room.removeUsedLetter(prevLetter)
+    }
 
     emitToRoom(socket, roomId, SocketEventTypes.LetterSelected, usedLetters)
   })
@@ -97,6 +101,7 @@ io.on('connection', (socket: Socket) => {
     room.setNextPlayer()
     room.resetCountdown()
     room.setLetterUnselectable(selectedLetter)
+    console.log(room.getUsedLetters())
     emitToRoom(
       socket,
       roomId,

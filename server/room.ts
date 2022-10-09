@@ -75,12 +75,17 @@ export class Room {
     // if the letter is already used and its value is true, remove it from the list
     if (letter in this.usedLetters) {
       if (this.usedLetters[letter] === true) {
-        delete this.usedLetters[letter]
+        this.removeUsedLetter(letter)
       }
     } else {
       this.usedLetters[letter] = true
     }
     return this.usedLetters
+  }
+  removeUsedLetter = (letter: string) => {
+    if (letter in this.usedLetters) {
+      delete this.usedLetters[letter]
+    }
   }
   resetCountdown = () => {
     clearInterval(this.countdown.timer)
