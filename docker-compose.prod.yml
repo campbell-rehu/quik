@@ -1,0 +1,12 @@
+version: '3.7'
+
+services:
+  quik-fe-prod:
+    container_name: quik-fe-prod
+    build:
+      context: .
+      dockerfile: Dockerfile.prod
+    environment:
+      - REACT_APP_SERVER_URL=${REACT_APP_SERVER_URL}
+    ports:
+      - '3000:80'
