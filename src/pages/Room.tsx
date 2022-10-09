@@ -26,17 +26,29 @@ export const Room: React.FC<Props> = ({ roomId, socket, hardMode = false }) => {
   })
   const [selectedLetter, setSelectedLetter] = useState<string>('')
   const isThisCurrentPlayer = () => socket.id === currentPlayer.id
+  const canSelectLetter = (letter: string) =>
+    isLetterSeletable(letter) || !isLetterUsed(letter)
+
+  const isLetterSeletable = (letter: string) =>
+    letter in usedLetters && usedLetters[letter] === true
+
+  const isLetterUsed = (letter: string) => letter in usedLetters
+
+  const isLetterInLetterSet = (letter: string) => letter in letterSet
 
   const toggleSelectLetter = (letter: string) => {
-    if (isThisCurrentPlayer()) {
-      if (letterSet[letter]) {
-        setSelectedLetter(letter)
-        socket.emit(
-          SocketEventType.SelectLetter,
-          JSON.stringify({ roomId, letter })
-        )
-      }
+    if (
+      !canSelectLetter(letter) ||
+      !isThisCurrentPlayer() ||
+      !isLetterInLetterSet(letter)
+    ) {
+      return
     }
+    setSelectedLetter(letter)
+    socket.emit(
+      SocketEventType.SelectLetter,
+      JSON.stringify({ roomId, letter })
+    )
   }
 
   const endTurn = () => {
@@ -49,11 +61,15 @@ export const Room: React.FC<Props> = ({ roomId, socket, hardMode = false }) => {
     }
   }
 
+  // eslint-disable-next-line react-hooks/exhaustive-deps
   const handleKeyDown = (e: KeyboardEvent) => {
     var key = e.key
-    toggleSelectLetter(key.toLocaleUpperCase())
     if (key === 'Enter') {
       endTurn()
+    } else {
+      var keyUpper = key.toUpperCase()
+      setSelectedLetter(keyUpper)
+      toggleSelectLetter(keyUpper)
     }
   }
 
@@ -88,26 +104,13 @@ export const Room: React.FC<Props> = ({ roomId, socket, hardMode = false }) => {
     return () => {
       window.removeEventListener('keydown', handleKeyDown)
     }
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [socket, roomId])
+  }, [socket, roomId, handleKeyDown])
 
   const handleLeaveRoom = (e: MouseEvent) => {
     socket.emit(
       SocketEventType.LeaveRoom,
       JSON.stringify({ roomId, playerId: socket.id })
     )
-  }
-
-  const isLetterSeletable = (letter: string) => {
-    return letter in usedLetters && usedLetters[letter] === true
-  }
-
-  const isLetterUsed = (letter: string) => {
-    return letter in usedLetters
-  }
-
-  const canSelectLetter = (letter: string) => {
-    return isLetterSeletable(letter) || !isLetterUsed(letter)
   }
 
   return (
@@ -121,7 +124,6 @@ export const Room: React.FC<Props> = ({ roomId, socket, hardMode = false }) => {
             key={letter}
             label={letter}
             used={letter in usedLetters}
-            canSelect={canSelectLetter(letter)}
             toggleSelectLetter={toggleSelectLetter}
           />
         ))}
