@@ -1,4 +1,5 @@
 build-fe:
+  image: node:13.12.0-alpine
   stage: build
   script:
     - echo "Building front-end project..."
