@@ -92,10 +92,11 @@ io.on('connection', (socket: Socket) => {
   })
 
   socket.on(SocketEventTypes.EndTurn, (msg: any) => {
-    var { roomId } = JSON.parse(msg)
+    var { roomId, selectedLetter } = JSON.parse(msg)
     const room = rooms.getRoom(roomId)
     room.setNextPlayer()
     room.resetCountdown()
+    room.setLetterUnselectable(selectedLetter)
     emitToRoom(
       socket,
       roomId,
