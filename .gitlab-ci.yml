@@ -3,8 +3,7 @@ build-fe:
   stage: build
   script:
     - echo "Building front-end project..."
-    - NODE_ENV=production
-    - npm i
+    - npm install
     - npm build
   artifacts:
     paths:
