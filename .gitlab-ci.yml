@@ -11,7 +11,7 @@ build-fe:
     - echo "Building front-end project..."
     - echo "$QUIK_SERVER_URL"
     - npm install
-    - SERVER=$QUIK_SERVER_URL REACT_APP_SERVER_URL=$QUIK_SERVER_URL npm run build
+    - SERVER=$QUIK_SERVER_URL npm run build
   artifacts:
     paths:
       - 'build/'
