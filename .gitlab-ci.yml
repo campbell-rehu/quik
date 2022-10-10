@@ -9,7 +9,6 @@ build-fe:
   environment: production
   script:
     - echo "Building front-end project..."
-    - echo "$QUIK_SERVER_URL"
     - npm install
     - SERVER=$QUIK_SERVER_URL npm run build
   artifacts:
