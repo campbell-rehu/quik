@@ -1,6 +1,7 @@
 stages:
   - build
   - docker
+  - deploy
 
 build-fe:
   image: node:13.12.0-alpine
