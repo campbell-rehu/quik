@@ -8,6 +8,7 @@ build-fe:
     REACT_APP_SERVER_URL: $QUICK_SERVER_URL
   image: node:13.12.0-alpine
   stage: build
+  environment: production
   script:
     - echo "Building front-end project..."
     - echo "$QUIK_SERVER_URL"
