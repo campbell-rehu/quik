@@ -4,15 +4,14 @@ stages:
   - deploy
 
 build-fe:
-  variables:
-    REACT_APP_SERVER_URL: $QUICK_SERVER_URL
   image: node:13.12.0-alpine
   stage: build
   environment: production
   script:
     - echo "Building front-end project..."
     - echo "$QUIK_SERVER_URL"
-    - echo "$REACT_APP_SERVER_URL"
+    - SERVER=$QUIK_SERVER_URL
+    - REACT_APP_SERVER_URL=$QUIK_SERVER_URL
     - npm install
     - npm run build
   artifacts:
