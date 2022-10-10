@@ -22,6 +22,7 @@ docker_image_build_release:
   stage: docker
   # only:
   #   - tags
+  environment: production
   script:
     - mkdir -p /kaniko/.docker
     - echo "{\"auths\":{\"$CI_REGISTRY\":{\"username\":\"$CI_REGISTRY_USER\",\"password\":\"$CI_REGISTRY_PASSWORD\"}}}" > /kaniko/.docker/config.json
