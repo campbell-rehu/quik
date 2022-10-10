@@ -7,7 +7,7 @@ build-fe:
     - npm build
   artifacts:
     paths:
-      - './build'
+      - 'build/'
     expire_in: 3 days
 
 test-job1:
