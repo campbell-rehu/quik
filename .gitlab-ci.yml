@@ -4,7 +4,7 @@ build-fe:
   script:
     - echo "Building front-end project..."
     - npm install
-    - npm build
+    - npm run build
   artifacts:
     paths:
       - 'build/'
