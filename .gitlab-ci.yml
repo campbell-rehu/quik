@@ -8,6 +8,8 @@ build-fe:
   stage: build
   script:
     - echo "Building front-end project..."
+    - echo "$QUIK_SERVER_URL"
+    - echo "$REACT_APP_SERVER_URL"
     - npm install
     - npm run build
   artifacts:
