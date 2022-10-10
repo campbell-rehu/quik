@@ -8,6 +8,15 @@ This app was built using `create-react-app` for the front-end and using the Plur
 
 The app has a front-end and back-end — both of which need to be running to play the game.
 
+## TODO
+
+- [ ] - Add automated tests for front-end
+- [ ] - Add test step to .gitlab-ci.yml
+- [ ] - Add automated tests for back-end
+- [ ] - Add push Docker image to registry step for back-end
+- [ ] - Source or build out game topic API
+- [ ] - UI/UX Improvements
+
 ## Installing the dependencies
 
 Run the following command from the project root directory AND from the `server`directory:
