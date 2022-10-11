@@ -7,5 +7,5 @@ COPY ./nginx/nginx.conf /etc/nginx/conf.d/default.conf
 EXPOSE 80
 
 COPY quik-fe-docker-entrypoint.sh /
-ENTRYPOINT ["/docker-entrypoint.sh"]
+ENTRYPOINT ["/quik-fe-docker-entrypoint.sh"]
 CMD ["nginx", "-g", "daemon off;"]
