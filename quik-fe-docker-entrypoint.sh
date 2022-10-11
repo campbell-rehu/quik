@@ -4,8 +4,6 @@ set -euo pipefail
 # Capture all environment variables starting with REACT_APP_ and make JSON string from them
 ENV_JSON="$(jq --compact-output --null-input 'env | with_entries(select(.key | startswith("REACT_APP_")))')"
 
-cat "$ENV_JSON"
-
 # Escape sed replacement's special characters: \, &, /.
 # No need to escape newlines, because --compact-output already removed them.
 # Inside of JSON strings newlines are already escaped.
