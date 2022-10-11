@@ -1,6 +1,8 @@
 #!/bin/sh
 set -euo pipefail
 
+apk add --no-cache jq
+
 # Capture all environment variables starting with REACT_APP_ and make JSON string from them
 ENV_JSON="$(jq --compact-output --null-input 'env | with_entries(select(.key | startswith("REACT_APP_")))')"
 
