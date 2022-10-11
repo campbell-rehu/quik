@@ -10,6 +10,6 @@ ENV_JSON="$(jq --compact-output --null-input 'env | with_entries(select(.key | s
 # Inside of JSON strings newlines are already escaped.
 ENV_JSON_ESCAPED="$(printf "%s" "${ENV_JSON}" | sed -e 's/[\&/]/\\&/g')"
 
-sed -i "s/<noscript id=\"env-insertion-point\"><\/noscript>/<script>var ENV=${ENV_JSON_ESCAPED}<\/script>/g" /var/www/index.html
+sed -i "s/<noscript id=\"env-insertion-point\"><\/noscript>/<script>var ENV=${ENV_JSON_ESCAPED}<\/script>/g" /usr/share/nginx/html/index.html
 
 exec "$@"
