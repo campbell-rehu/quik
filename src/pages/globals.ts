@@ -4,7 +4,7 @@ export {}
 declare global {
   interface Window {
     ENV?: {
-      REACT_APP_API_URL?: string
+      REACT_APP_SERVER_URL?: string
     }
   }
 }
