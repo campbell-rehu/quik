@@ -10,11 +10,11 @@ import { SERVER_URL } from './config'
 import { RoomContextProvider } from './RoomContext'
 
 type Value = {
-  socket: Socket | null
+  socket: Socket
 }
 
 const defaultValue: Value = {
-  socket: null,
+  socket: io(SERVER_URL),
 }
 
 const WebSocketContext = createContext<Value>(defaultValue)
@@ -33,6 +33,10 @@ export const WebSocketContextProvider: React.FC<PropsWithChildren> = ({
       newSocket.close()
     }
   }, [setSocket])
+
+  if (!socket) {
+    return <div>Loading...</div>
+  }
 
   const ws = {
     socket,

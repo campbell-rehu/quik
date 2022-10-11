@@ -37,10 +37,6 @@ export const Setup: React.FC<Props> = ({ hardMode }) => {
     }
   }, [socket, roomId, playerName])
 
-  if (!socket) {
-    return <div>Loading...</div>
-  }
-
   if (!roomId) {
     return (
       <>

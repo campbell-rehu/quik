@@ -24,7 +24,7 @@ const RoomContext = React.createContext<Value>(defaultValue)
 export const useRoomContext = () => React.useContext(RoomContext)
 
 interface Props {
-  socket: Socket | null
+  socket: Socket
 }
 
 export const RoomContextProvider: React.FC<Props & PropsWithChildren> = ({
@@ -68,7 +68,7 @@ export const RoomContextProvider: React.FC<Props & PropsWithChildren> = ({
     })
     const json = await response.json()
     setPlayerNameLocal(json.playerName)
-    socket?.emit(SocketEventType.JoinRoom, roomId)
+    socket.emit(SocketEventType.JoinRoom, roomId)
   }
 
   const value: Value = {
