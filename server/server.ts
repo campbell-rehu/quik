@@ -19,6 +19,14 @@ const port = 5000
 app.use(cors({ origin: '*' }))
 app.use(express.json())
 
+app.set('trust-proxy', (ip: string) => {
+  console.log({ ip })
+  if (process.env.NODE_ENV === 'production') {
+    return ip === process.env.PROXY_IP_ADDRESS
+  }
+  return true
+})
+
 let rooms = new Rooms()
 
 // Create new game room
