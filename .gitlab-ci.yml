@@ -38,13 +38,13 @@ docker_front_end_image_build_release:
     - /kaniko/executor --context $CI_PROJECT_DIR --dockerfile $CI_PROJECT_DIR/Dockerfile --destination $CI_REGISTRY_IMAGE/quik-fe:latest
 
 build-be:
-  image: node:13.12.0-alpine
+  image: node:16.17.1-alpine3.15
   stage: build
   environment: production
   script:
     - cd server/
     - npm install
-    - npm run build
+    - NODE_ENV=production npm run build
   artifacts:
     paths:
       - 'server/dist/'
