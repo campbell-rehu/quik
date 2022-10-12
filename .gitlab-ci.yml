@@ -34,8 +34,8 @@ docker_front_end_image_build_release:
   script:
     - mkdir -p /kaniko/.docker
     - echo "{\"auths\":{\"$CI_REGISTRY\":{\"username\":\"$CI_REGISTRY_USER\",\"password\":\"$CI_REGISTRY_PASSWORD\"}}}" > /kaniko/.docker/config.json
-    # - /kaniko/executor --context $CI_PROJECT_DIR --dockerfile $CI_PROJECT_DIR/Dockerfile --destination $CI_REGISTRY_IMAGE/quik-fe:$CI_COMMIT_TAG
-    - /kaniko/executor --context $CI_PROJECT_DIR --dockerfile $CI_PROJECT_DIR/Dockerfile --destination $CI_REGISTRY_IMAGE/quik-fe:latest
+    - /kaniko/executor --context $CI_PROJECT_DIR --dockerfile $CI_PROJECT_DIR/Dockerfile --destination $CI_REGISTRY_IMAGE/quik-fe:$CI_COMMIT_TAG
+    # - /kaniko/executor --context $CI_PROJECT_DIR --dockerfile $CI_PROJECT_DIR/Dockerfile --destination $CI_REGISTRY_IMAGE/quik-fe:latest
 
 build-be:
   image: node:13.12.0-alpine
@@ -47,7 +47,7 @@ build-be:
     - npm run build
   artifacts:
     paths:
-      - './dist/'
+      - 'dist/'
     expire_in: 3 days
 
 docker_back_end_image_build_release:
@@ -61,8 +61,8 @@ docker_back_end_image_build_release:
   script:
     - mkdir -p /kaniko/.docker
     - echo "{\"auths\":{\"$CI_REGISTRY\":{\"username\":\"$CI_REGISTRY_USER\",\"password\":\"$CI_REGISTRY_PASSWORD\"}}}" > /kaniko/.docker/config.json
-    # - /kaniko/executor --context $CI_PROJECT_DIR --dockerfile $CI_PROJECT_DIR/Dockerfile --destination $CI_REGISTRY_IMAGE/quik-fe:$CI_COMMIT_TAG
-    - /kaniko/executor --context $CI_PROJECT_DIR --dockerfile $CI_PROJECT_DIR/server/Dockerfile.prod --destination $CI_REGISTRY_IMAGE/quik-be:latest
+    - /kaniko/executor --context $CI_PROJECT_DIR --dockerfile $CI_PROJECT_DIR/Dockerfile --destination $CI_REGISTRY_IMAGE/quik-fe:$CI_COMMIT_TAG
+    # - /kaniko/executor --context $CI_PROJECT_DIR --dockerfile $CI_PROJECT_DIR/server/Dockerfile.prod --destination $CI_REGISTRY_IMAGE/quik-be:latest
 
 deploy-prod:
   stage: deploy
