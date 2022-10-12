@@ -47,7 +47,7 @@ build-be:
     - npm run build
   artifacts:
     paths:
-      - 'dist/'
+      - 'server/dist/'
     expire_in: 3 days
 
 docker_back_end_image_build_release:
