@@ -1,4 +1,3 @@
-import React from 'react'
 import { Routes as QuickRoutes } from '../types'
 import { Lobby } from './Lobby'
 import { Splash } from './Splash'
