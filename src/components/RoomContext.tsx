@@ -1,7 +1,7 @@
 import React, { PropsWithChildren, useState } from 'react'
 import { Socket } from 'socket.io-client'
-import { SERVER_URL } from './config'
-import { SocketEventType } from './constants'
+import { SERVER_URL } from '../config'
+import { SocketEventType } from '../constants'
 
 type Value = {
   roomId: string

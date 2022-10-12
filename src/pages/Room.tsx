@@ -6,12 +6,12 @@ import React, {
   useState,
 } from 'react'
 import { Socket } from 'socket.io-client'
-import { Button } from './Button'
-import { LettersEasy, SocketEventType, LettersHard } from './constants'
-import { StringArrayToBooleanMap } from './helpers'
-import { Letter } from './Letter'
-import { Timer } from './Timer'
-import { BooleanMap, Page, Player } from './types'
+import { Button } from '../components/Button'
+import { LettersEasy, SocketEventType, LettersHard } from '../constants'
+import { StringArrayToBooleanMap } from '../helpers'
+import { Letter } from '../components/Letter'
+import { Timer } from '../components/Timer'
+import { BooleanMap, Page, Player } from '../types'
 
 interface Props {
   roomId: string

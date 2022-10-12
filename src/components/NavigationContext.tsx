@@ -1,6 +1,6 @@
 import React, { PropsWithChildren } from 'react'
-import { Page } from './types'
-import { PageToRoute } from './constants'
+import { Page } from '../types'
+import { PageToRoute } from '../constants'
 import { useNavigate } from 'react-router-dom'
 
 type Value = {

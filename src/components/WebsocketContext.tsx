@@ -6,7 +6,7 @@ import React, {
   useState,
 } from 'react'
 import { io, Socket } from 'socket.io-client'
-import { SERVER_URL } from './config'
+import { SERVER_URL } from '../config'
 import { RoomContextProvider } from './RoomContext'
 
 type Value = {

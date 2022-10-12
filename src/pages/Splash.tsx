@@ -1,6 +1,6 @@
 import React from 'react'
-import { Button } from './Button'
-import { Page } from './types'
+import { Button } from '../components/Button'
+import { Page } from '../types'
 
 export const Splash: React.FC<{}> = () => {
   return (

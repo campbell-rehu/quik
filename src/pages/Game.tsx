@@ -1,17 +1,17 @@
-import React, { PropsWithChildren, useEffect, useRef } from 'react'
+import React, { useEffect, useRef } from 'react'
 import './Game.css'
 import {
   useWebSocketContext,
   WebSocketContextProvider,
-} from './WebsocketContext'
+} from '../components/WebsocketContext'
 import { Room } from './Room'
-import { useRoomContext } from './RoomContext'
+import { useRoomContext } from '../components/RoomContext'
 
 interface Props {
   hardMode?: boolean
 }
 
-export const GameContainer: React.FC<PropsWithChildren> = ({ children }) => {
+export const GameContainer: React.FC<{}> = () => {
   return (
     <WebSocketContextProvider>
       <Setup />

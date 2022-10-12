@@ -1,6 +1,6 @@
 import React, { MouseEvent } from 'react'
 import { useNavigationContext } from './NavigationContext'
-import { Page } from './types'
+import { Page } from '../types'
 
 interface Props {
   to: Page

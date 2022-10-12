@@ -1,9 +1,9 @@
 import React from 'react'
-import { Routes as QuickRoutes } from './types'
+import { Routes as QuickRoutes } from '../types'
 import { Lobby } from './Lobby'
 import { Splash } from './Splash'
 import { GameContainer } from './Game'
-import { NavigationContextProvider } from './NavigationContext'
+import { NavigationContextProvider } from '../components/NavigationContext'
 import {
   BrowserRouter as Router,
   Routes,
