@@ -16,6 +16,9 @@ build-fe:
   image: node:13.12.0-alpine
   stage: build
   environment: production
+  rules:
+    - changes:
+      - 'src/*'
   script:
     - npm install
     - SERVER=$QUIK_SERVER_URL BUILD_PATH=./fe-build npm run build
