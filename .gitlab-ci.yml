@@ -3,7 +3,6 @@ stages:
   - build
   - docker-branch
   - docker-release
-  - deploy
 
 test-fe:
   image: node:13.12.0-alpine
@@ -109,9 +108,3 @@ docker_back_end_image_build_release:
     - mkdir -p /kaniko/.docker
     - echo "{\"auths\":{\"$CI_REGISTRY\":{\"username\":\"$CI_REGISTRY_USER\",\"password\":\"$CI_REGISTRY_PASSWORD\"}}}" > /kaniko/.docker/config.json
     - /kaniko/executor --context $CI_PROJECT_DIR/server --dockerfile $CI_PROJECT_DIR/server/Dockerfile --destination $CI_REGISTRY_IMAGE/quik-be:latest
-
-deploy-prod:
-  stage: deploy
-  script:
-    - echo "This job deploys something from the $CI_COMMIT_BRANCH branch."
-  environment: production
