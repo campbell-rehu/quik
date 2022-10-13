@@ -5,12 +5,12 @@ import userEvent from '@testing-library/user-event'
 
 describe('Letter', () => {
   it('renders the letter', () => {
-    render(<Letter label='L' used={false} toggleSelectLetter={jest.fn()} />)
-    expect(screen.getByText('L')).toBeDefined()
+    render(<Letter label='A' used={false} toggleSelectLetter={jest.fn()} />)
+    expect(screen.getByText('A')).toBeDefined()
   })
   it('contains the .used class name when used is true', () => {
-    render(<Letter label='L' used={true} toggleSelectLetter={jest.fn()} />)
-    const el = screen.getByText('L')
+    render(<Letter label='A' used={true} toggleSelectLetter={jest.fn()} />)
+    const el = screen.getByText('A')
     expect(el).toBeDefined()
     expect(el.classList.contains('used')).toBeTruthy()
   })
@@ -18,12 +18,12 @@ describe('Letter', () => {
     const toggleSelectLetterMock = jest.fn()
     render(
       <Letter
-        label='L'
+        label='A'
         used={false}
         toggleSelectLetter={toggleSelectLetterMock}
       />
     )
-    const el = screen.getByText('L')
+    const el = screen.getByText('A')
     expect(el).toBeDefined()
     userEvent.click(el)
     expect(toggleSelectLetterMock).toBeCalled()
