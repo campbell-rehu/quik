@@ -1,12 +1,14 @@
 stages:
-  - test
-  - build
+  - front-end
+  - back-end
   - docker-branch
-  - docker-release
+  - docker-release-front-end
+  - docker-release-back-end
 
+# Test steps
 test-fe:
   image: node:13.12.0-alpine
-  stage: test
+  stage: front-end
   rules:
     - changes:
       - 'src/*'
@@ -14,9 +16,10 @@ test-fe:
     - npm install
     - CI=true npm test
 
+# Build steps
 build-fe:
   image: node:13.12.0-alpine
-  stage: build
+  stage: front-end
   environment: production
   rules:
     - changes:
@@ -29,41 +32,9 @@ build-fe:
       - 'fe-build/'
     expire_in: 3 days
 
-docker_front_end_image_build_branch:
-  image:
-    name: gcr.io/kaniko-project/executor:debug
-    entrypoint: ['']
-  stage: docker-branch
-  rules:
-    - if: $CI_COMMIT_BRANCH != "main"
-      changes:
-        - 'src/*'
-      when: always
-  environment: production
-  script:
-    - mkdir -p /kaniko/.docker
-    - echo "{\"auths\":{\"$CI_REGISTRY\":{\"username\":\"$CI_REGISTRY_USER\",\"password\":\"$CI_REGISTRY_PASSWORD\"}}}" > /kaniko/.docker/config.json
-    - /kaniko/executor --context $CI_PROJECT_DIR --dockerfile $CI_PROJECT_DIR/Dockerfile --destination $CI_REGISTRY_IMAGE/quik-fe:$CI_COMMIT_BRANCH
-
-docker_front_end_image_build_release:
-  image:
-    name: gcr.io/kaniko-project/executor:debug
-    entrypoint: ['']
-  stage: docker-release
-  rules:
-    - if: $CI_COMMIT_BRANCH == "main"
-      changes:
-        - 'src/*'
-      when: always
-  environment: production
-  script:
-    - mkdir -p /kaniko/.docker
-    - echo "{\"auths\":{\"$CI_REGISTRY\":{\"username\":\"$CI_REGISTRY_USER\",\"password\":\"$CI_REGISTRY_PASSWORD\"}}}" > /kaniko/.docker/config.json
-    - /kaniko/executor --context $CI_PROJECT_DIR --dockerfile $CI_PROJECT_DIR/Dockerfile --destination $CI_REGISTRY_IMAGE/quik-fe:latest
-
 build-be:
   image: node:16.17.1-alpine3.15
-  stage: build
+  stage: back-end
   environment: production
   rules:
     - changes:
@@ -77,11 +48,29 @@ build-be:
       - 'server/dist/'
     expire_in: 3 days
 
+# Docker image build and release for branch steps
+
+docker_front_end_image_build_branch:
+  image:
+    name: gcr.io/kaniko-project/executor:debug
+    entrypoint: ['']
+  stage: front-end
+  rules:
+    - if: $CI_COMMIT_BRANCH != "main"
+      changes:
+        - 'src/*'
+      when: always
+  environment: production
+  script:
+    - mkdir -p /kaniko/.docker
+    - echo "{\"auths\":{\"$CI_REGISTRY\":{\"username\":\"$CI_REGISTRY_USER\",\"password\":\"$CI_REGISTRY_PASSWORD\"}}}" > /kaniko/.docker/config.json
+    - /kaniko/executor --context $CI_PROJECT_DIR --dockerfile $CI_PROJECT_DIR/Dockerfile --destination $CI_REGISTRY_IMAGE/quik-fe:$CI_COMMIT_BRANCH
+
 docker_back_end_image_build_branch:
   image:
     name: gcr.io/kaniko-project/executor:debug
     entrypoint: ['']
-  stage: docker-branch
+  stage: back-end
   rules:
     - if: $CI_COMMIT_BRANCH != "main"
       changes:
@@ -93,11 +82,28 @@ docker_back_end_image_build_branch:
     - echo "{\"auths\":{\"$CI_REGISTRY\":{\"username\":\"$CI_REGISTRY_USER\",\"password\":\"$CI_REGISTRY_PASSWORD\"}}}" > /kaniko/.docker/config.json
     - /kaniko/executor --context $CI_PROJECT_DIR/server --dockerfile $CI_PROJECT_DIR/server/Dockerfile --destination $CI_REGISTRY_IMAGE/quik-be:$CI_COMMIT_BRANCH
 
+# Docker iamge build and release for main branch steps
+docker_front_end_image_build_release:
+  image:
+    name: gcr.io/kaniko-project/executor:debug
+    entrypoint: ['']
+  stage: docker-release-front-end
+  rules:
+    - if: $CI_COMMIT_BRANCH == "main"
+      changes:
+        - 'src/*'
+      when: always
+  environment: production
+  script:
+    - mkdir -p /kaniko/.docker
+    - echo "{\"auths\":{\"$CI_REGISTRY\":{\"username\":\"$CI_REGISTRY_USER\",\"password\":\"$CI_REGISTRY_PASSWORD\"}}}" > /kaniko/.docker/config.json
+    - /kaniko/executor --context $CI_PROJECT_DIR --dockerfile $CI_PROJECT_DIR/Dockerfile --destination $CI_REGISTRY_IMAGE/quik-fe:latest
+
 docker_back_end_image_build_release:
   image:
     name: gcr.io/kaniko-project/executor:debug
     entrypoint: ['']
-  stage: docker-release
+  stage: docker-release-back-end
   rules:
     - if: $CI_COMMIT_BRANCH == "main"
       changes:
