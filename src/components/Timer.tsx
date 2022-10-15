@@ -34,14 +34,24 @@ export const Timer: React.FC<Props> = ({ reset }) => {
   }, [socket])
 
   return (
-    <div className='timer-container'>
+    <div className='container'>
       {seconds === 0 ? (
         <>
-          <div>Player lost!</div>
-          <button onClick={() => resetTimer()}>Reset</button>
+          <h1 className='title'>Player lost!</h1>
+          <button className='button is-link' onClick={() => resetTimer()}>
+            Reset
+          </button>
         </>
       ) : (
-        <>{seconds}</>
+        <div className='container'>
+          <label>{seconds}</label>
+          <progress
+            className='progress is-link is-large'
+            max={10}
+            value={seconds}>
+            {seconds}
+          </progress>
+        </div>
       )}
     </div>
   )

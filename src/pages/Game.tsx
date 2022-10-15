@@ -6,6 +6,9 @@ import {
 } from '../components/WebsocketContext'
 import { Room } from './Room'
 import { useRoomContext } from '../components/RoomContext'
+import { Button } from '../components/Button'
+import { Page } from '../types'
+import { InputField } from '../components/InputField'
 
 interface Props {
   hardMode?: boolean
@@ -14,7 +17,12 @@ interface Props {
 export const GameContainer: React.FC<{}> = () => {
   return (
     <WebSocketContextProvider>
-      <Setup />
+      <>
+        <div className='buttons'>
+          <Button to={Page.HowToPlay} />
+        </div>
+        <Setup />
+      </>
     </WebSocketContextProvider>
   )
 }
@@ -40,59 +48,51 @@ export const Setup: React.FC<Props> = ({ hardMode }) => {
   if (!roomId) {
     return (
       <>
-        <div className='create-room-container'>
-          <input
-            id='room-name'
-            name='room-name'
-            type='text'
-            ref={createRoomInput}
-          />
-          <button
-            type='button'
-            onClick={(e) => {
-              var input = document.querySelector(
-                '#room-name'
-              ) as HTMLInputElement
-              createRoom(input.value)
-            }}>
-            Create room
-          </button>
-        </div>
-        <div className='join-room-container'>
-          <input id='room-id' name='room-id' type='text' ref={joinRoomInput} />
-          <button
-            type='button'
-            onClick={(e) => {
-              var input = document.querySelector('#room-id') as HTMLInputElement
-              joinRoom(input.value)
-            }}>
-            Join room
-          </button>
-        </div>
+        <InputField
+          inputProps={{
+            id: 'room-name',
+            name: 'room-name',
+            placeholder: 'Enter a room name',
+          }}
+          inputRef={createRoomInput}
+          buttonLabel='Create a new game room'
+          onClick={() => {
+            var input = document.querySelector('#room-name') as HTMLInputElement
+            createRoom(input.value)
+          }}
+        />
+        <InputField
+          inputProps={{
+            id: 'room-id',
+            name: 'room-id',
+            placeholder: 'Enter a game room Id',
+          }}
+          inputRef={joinRoomInput}
+          buttonLabel='Join an existing room'
+          onClick={() => {
+            var input = document.querySelector('#room-id') as HTMLInputElement
+            joinRoom(input.value)
+          }}
+        />
       </>
     )
   }
 
   if (!playerName) {
     return (
-      <div className='set-player-name-container'>
-        <input
-          id='player-name'
-          name='player-name'
-          type='text'
-          ref={setPlayerNameInput}
-        />
-        <button
-          type='button'
-          onClick={(e) => {
-            var input = document.querySelector(
-              '#player-name'
-            ) as HTMLInputElement
-            setPlayerName(roomId, socket.id, input.value)
-          }}>
-          Set Player Name
-        </button>
-      </div>
+      <InputField
+        inputProps={{
+          id: 'player-name',
+          name: 'player-name',
+          placeholder: 'Enter your player name',
+        }}
+        inputRef={setPlayerNameInput}
+        buttonLabel='Set Player Name'
+        onClick={() => {
+          var input = document.querySelector('#player-name') as HTMLInputElement
+          setPlayerName(roomId, socket.id, input.value)
+        }}
+      />
     )
   }
 
