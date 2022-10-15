@@ -121,13 +121,17 @@ export const Room: React.FC<Props> = ({ roomId, socket, hardMode = false }) => {
   }, [hardMode])
 
   return (
-    <section ref={sectionRef} tabIndex={0} onKeyDown={handleKeyDown}>
+    <section
+      className='section'
+      ref={sectionRef}
+      tabIndex={0}
+      onKeyDown={handleKeyDown}>
       <Button
         to={Page.HowToPlay}
         label='Leave Room'
         onClick={handleLeaveRoom}
       />
-      <h1>Game room: {roomId}</h1>
+      <h1 className='title'>Game room: {roomId}</h1>
       <Timer reset={resetTimer} />
       <div className='letters-container'>
         {Object.keys(letterSet).map((letter) => (
@@ -139,9 +143,13 @@ export const Room: React.FC<Props> = ({ roomId, socket, hardMode = false }) => {
           />
         ))}
       </div>
-      <div className='topic-container'>Children's songs</div>
-      <div className='turn-container'>{currentPlayer.name}'s turn</div>
-      <button onClick={endTurn}>End Turn</button>
+      <div className='topic-container title is-2'>Topic: Children's songs</div>
+      <div className='turn-container subtitle is-4'>
+        {currentPlayer.name}'s turn
+      </div>
+      <button className='button is-link' onClick={endTurn}>
+        End Turn
+      </button>
     </section>
   )
 }

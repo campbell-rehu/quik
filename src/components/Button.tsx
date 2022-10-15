@@ -12,7 +12,7 @@ export const Button: React.FC<Props> = ({ to, label, onClick }) => {
   const { goToPage } = useNavigationContext()
   return (
     <button
-      className='button is-primary is-light'
+      className='button is-link'
       onClick={(e) => {
         if (onClick) {
           onClick(e)
