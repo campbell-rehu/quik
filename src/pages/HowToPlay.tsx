@@ -1,17 +1,23 @@
-import React from 'react'
+import React, { useEffect } from 'react'
 import { Button } from '../components/Button'
+import { useNavigationContext } from '../components/NavigationContext'
 import { Page } from '../types'
 
 export const HowToPlay: React.FC<{}> = () => {
+  const { setNavItems, setShowNavBar } = useNavigationContext()
+  useEffect(() => {
+    setNavItems(
+      <div className='buttons'>
+        <Button to={Page.Splash} label='Back' />
+        <Button to={Page.Game} label='Play Now' />
+      </div>
+    )
+    setShowNavBar(true)
+  }, [setNavItems, setShowNavBar])
   return (
     <>
       <div className='content'>
         <h1>How to play Quik</h1>
-
-        <div className='buttons'>
-          <Button to={Page.Splash} label='Back' />
-          <Button to={Page.Game} label='Play Now' />
-        </div>
 
         <p>
           <strong>Quik</strong> is a fun, fast-paced multiplayer game that will

@@ -1,8 +1,13 @@
-import React from 'react'
+import React, { useEffect } from 'react'
 import { Button } from '../components/Button'
+import { useNavigationContext } from '../components/NavigationContext'
 import { Page } from '../types'
 
 export const Splash: React.FC<{}> = () => {
+  const { setShowNavBar } = useNavigationContext()
+  useEffect(() => {
+    setShowNavBar(false)
+  }, [])
   return (
     <section className='hero is-large is-success'>
       <div className='hero-body'>

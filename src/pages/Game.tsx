@@ -9,20 +9,26 @@ import { useRoomContext } from '../components/RoomContext'
 import { Button } from '../components/Button'
 import { Page } from '../types'
 import { InputField } from '../components/InputField'
+import { useNavigationContext } from '../components/NavigationContext'
 
 interface Props {
   hardMode?: boolean
 }
 
 export const GameContainer: React.FC<{}> = () => {
+  const { setShowNavBar, setNavItems } = useNavigationContext()
+  useEffect(() => {
+    setShowNavBar(true)
+    setNavItems(
+      <div className='buttons'>
+        <Button to={Page.HowToPlay} />
+      </div>
+    )
+  }, [setNavItems, setShowNavBar])
+
   return (
     <WebSocketContextProvider>
-      <>
-        <div className='buttons'>
-          <Button to={Page.HowToPlay} />
-        </div>
-        <Setup />
-      </>
+      <Setup />
     </WebSocketContextProvider>
   )
 }
