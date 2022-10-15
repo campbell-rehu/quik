@@ -1,5 +1,5 @@
 import { Routes as QuickRoutes } from '../types'
-import { Lobby } from './Lobby'
+import { HowToPlay } from './HowToPlay'
 import { Splash } from './Splash'
 import { GameContainer } from './Game'
 import { NavigationContextProvider } from '../components/NavigationContext'
@@ -20,7 +20,7 @@ export const App = () => {
           <NavigationContextProvider>
             <Routes>
               <Route path={QuickRoutes.Splash} element={<Splash />} />
-              <Route path={QuickRoutes.Lobby} element={<Lobby />} />
+              <Route path={QuickRoutes.HowToPlay} element={<HowToPlay />} />
               <Route path={QuickRoutes.Game} element={<GameContainer />} />
               <Route
                 path='*'

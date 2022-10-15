@@ -122,7 +122,11 @@ export const Room: React.FC<Props> = ({ roomId, socket, hardMode = false }) => {
 
   return (
     <section ref={sectionRef} tabIndex={0} onKeyDown={handleKeyDown}>
-      <Button to={Page.Lobby} label='Leave Room' onClick={handleLeaveRoom} />
+      <Button
+        to={Page.HowToPlay}
+        label='Leave Room'
+        onClick={handleLeaveRoom}
+      />
       <h1>Game room: {roomId}</h1>
       <Timer reset={resetTimer} />
       <div className='letters-container'>

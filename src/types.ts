@@ -1,12 +1,12 @@
 export enum Page {
   Splash = 'Splash',
-  Lobby = 'Lobby',
+  HowToPlay = 'How to Play',
   Game = 'Game',
 }
 
 export enum Routes {
   Splash = '/splash',
-  Lobby = '/lobby',
+  HowToPlay = '/how-to-play',
   Game = '/game',
 }
 

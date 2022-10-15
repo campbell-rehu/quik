@@ -2,7 +2,7 @@ import { Page, Routes } from './types'
 
 export const PageToRoute = {
   [Page.Splash]: Routes.Splash,
-  [Page.Lobby]: Routes.Lobby,
+  [Page.HowToPlay]: Routes.HowToPlay,
   [Page.Game]: Routes.Game,
 }
 

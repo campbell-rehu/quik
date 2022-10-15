@@ -9,7 +9,7 @@ export const Splash: React.FC<{}> = () => {
         <div className=''>
           <p className='title'>Quik</p>
           <div className='buttons'>
-            <Button to={Page.Lobby} label='How to Play' />
+            <Button to={Page.HowToPlay} label='How to Play' />
             <Button to={Page.Game} label='Play Now' />
           </div>
         </div>
