@@ -32,7 +32,7 @@ export const NavigationContextProvider: React.FC<PropsWithChildren> = ({
       <>
         {showNavBar ? (
           <nav
-            className='navbar block is-primary'
+            className='navbar is-primary mb-5'
             role='navigation'
             aria-label='main navigation'>
             <div className='navbar-brand'>

@@ -25,7 +25,7 @@ export const InputField: React.FC<Props> = ({
           />
         </div>
         <div className='control'>
-          <button type='button' className='button is-link' onClick={onClick}>
+          <button type='button' className='button is-primary' onClick={onClick}>
             {buttonLabel}
           </button>
         </div>

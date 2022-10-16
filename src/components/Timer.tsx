@@ -1,3 +1,4 @@
+import classNames from 'classnames'
 import React, { useState } from 'react'
 import { useEffect } from 'react'
 import { useRoomContext } from './RoomContext'
@@ -34,19 +35,27 @@ export const Timer: React.FC<Props> = ({ reset }) => {
   }, [socket])
 
   return (
-    <div className='container'>
+    <div className='container block'>
       {seconds === 0 ? (
-        <>
-          <h1 className='title'>Player lost!</h1>
-          <button className='button is-link' onClick={() => resetTimer()}>
-            Reset
-          </button>
-        </>
+        <div className='container'>
+          <h1 className='title has-text-centered'>Player lost!</h1>
+          <div className='buttons is-centered'>
+            <button className='button is-primary' onClick={() => resetTimer()}>
+              Reset
+            </button>
+          </div>
+        </div>
       ) : (
         <div className='container'>
-          <label>{seconds}</label>
+          <p className='mb-3 is-size-4 has-text-centered'>
+            <strong>{seconds}</strong>
+          </p>
           <progress
-            className='progress is-link is-large'
+            className={classNames('progress is-large', {
+              'is-primary': seconds > 6,
+              'is-warning': seconds > 3 && seconds <= 6,
+              'is-danger': seconds > 0 && seconds <= 3,
+            })}
             max={10}
             value={seconds}>
             {seconds}

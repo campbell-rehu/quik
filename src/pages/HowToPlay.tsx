@@ -1,16 +1,19 @@
 import React, { useEffect } from 'react'
-import { Button } from '../components/Button'
 import { useNavigationContext } from '../components/NavigationContext'
-import { Page } from '../types'
+import { Routes } from '../types'
 
 export const HowToPlay: React.FC<{}> = () => {
   const { setNavItems, setShowNavBar } = useNavigationContext()
   useEffect(() => {
     setNavItems(
-      <div className='buttons'>
-        <Button to={Page.Splash} label='Back' />
-        <Button to={Page.Game} label='Play Now' />
-      </div>
+      <>
+        <a className='navbar-item' href={Routes.Splash}>
+          Back
+        </a>
+        <a className='navbar-item' href={Routes.Game}>
+          Play Now
+        </a>
+      </>
     )
     setShowNavBar(true)
   }, [setNavItems, setShowNavBar])

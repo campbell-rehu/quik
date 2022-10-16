@@ -11,7 +11,8 @@ import { LettersEasy, SocketEventType, LettersHard } from '../constants'
 import { StringArrayToBooleanMap } from '../helpers'
 import { Letter } from '../components/Letter'
 import { Timer } from '../components/Timer'
-import { BooleanMap, Page, Player } from '../types'
+import { BooleanMap, Page, Player, Routes } from '../types'
+import { useNavigationContext } from '../components/NavigationContext'
 
 interface Props {
   roomId: string
@@ -20,6 +21,7 @@ interface Props {
 }
 
 export const Room: React.FC<Props> = ({ roomId, socket, hardMode = false }) => {
+  const { setShowNavBar, setNavItems } = useNavigationContext()
   const [usedLetters, setUsedLetters] = useState<BooleanMap>({})
   const [letterSet, setLetterSet] = useState<BooleanMap>(
     StringArrayToBooleanMap(Object.values(LettersEasy))
@@ -120,36 +122,54 @@ export const Room: React.FC<Props> = ({ roomId, socket, hardMode = false }) => {
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [hardMode])
 
+  useEffect(() => {
+    setShowNavBar(true)
+    setNavItems(
+      <a
+        className='navbar-item'
+        href={Routes.HowToPlay}
+        onClick={handleLeaveRoom}>
+        Leave Room
+      </a>
+    )
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [setShowNavBar, setNavItems])
+
   return (
     <section
       className='section'
       ref={sectionRef}
       tabIndex={0}
       onKeyDown={handleKeyDown}>
-      <Button
-        to={Page.HowToPlay}
-        label='Leave Room'
-        onClick={handleLeaveRoom}
-      />
-      <h1 className='title'>Game room: {roomId}</h1>
-      <Timer reset={resetTimer} />
-      <div className='letters-container'>
-        {Object.keys(letterSet).map((letter) => (
-          <Letter
-            key={letter}
-            label={letter}
-            used={letter in usedLetters}
-            toggleSelectLetter={toggleSelectLetter}
-          />
-        ))}
+      <div className='container'>
+        <h1 className='title has-text-centered'>Game room: {roomId}</h1>
+        <Timer reset={resetTimer} />
+        <div className='container letters-container has-text-centered mb-4'>
+          {Object.keys(letterSet).map((letter) => (
+            <Letter
+              key={letter}
+              label={letter}
+              used={letter in usedLetters}
+              toggleSelectLetter={toggleSelectLetter}
+            />
+          ))}
+        </div>
+        <div className='container has-text-centered'>
+          <div className='block'>
+            <div className='turn-container subtitle is-4'>Topic</div>
+            <div className='topic-container title is-2'>Children's songs</div>
+          </div>
+          <div className='block'>
+            <div className='turn-container subtitle is-4'>Turn</div>
+            <div className='topic-container title is-2'>
+              {currentPlayer.name}'s turn
+            </div>
+          </div>
+          <button className='button is-primary' onClick={endTurn}>
+            End Turn
+          </button>
+        </div>
       </div>
-      <div className='topic-container title is-2'>Topic: Children's songs</div>
-      <div className='turn-container subtitle is-4'>
-        {currentPlayer.name}'s turn
-      </div>
-      <button className='button is-link' onClick={endTurn}>
-        End Turn
-      </button>
     </section>
   )
 }

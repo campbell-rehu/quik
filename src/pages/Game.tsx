@@ -6,8 +6,7 @@ import {
 } from '../components/WebsocketContext'
 import { Room } from './Room'
 import { useRoomContext } from '../components/RoomContext'
-import { Button } from '../components/Button'
-import { Page } from '../types'
+import { Routes } from '../types'
 import { InputField } from '../components/InputField'
 import { useNavigationContext } from '../components/NavigationContext'
 
@@ -20,9 +19,9 @@ export const GameContainer: React.FC<{}> = () => {
   useEffect(() => {
     setShowNavBar(true)
     setNavItems(
-      <div className='buttons'>
-        <Button to={Page.HowToPlay} />
-      </div>
+      <a className='navbar-item' href={Routes.HowToPlay}>
+        How To Play
+      </a>
     )
   }, [setNavItems, setShowNavBar])
 
@@ -91,6 +90,7 @@ export const Setup: React.FC<Props> = ({ hardMode }) => {
           id: 'player-name',
           name: 'player-name',
           placeholder: 'Enter your player name',
+          defaultValue: '',
         }}
         inputRef={setPlayerNameInput}
         buttonLabel='Set Player Name'
