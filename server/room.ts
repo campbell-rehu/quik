@@ -43,6 +43,7 @@ export class Room {
     time: number
   }
   private currentPlayerIndex: number
+  private locked: boolean
 
   constructor(roomId: string) {
     this.roomId = roomId
@@ -54,6 +55,7 @@ export class Room {
       time: 10,
     }
     this.currentPlayerIndex = 0
+    this.locked = false
   }
 
   getId = () => this.roomId
@@ -63,6 +65,14 @@ export class Room {
   getCurrentPlayer = () =>
     this.players[Object.keys(this.players)[this.currentPlayerIndex]]
   getNumberOfPlayers = () => Object.keys(this.players).length
+  getIsLocked = () => this.locked
+
+  lockRoom = () => {
+    this.locked = true
+  }
+  unlockRoom = () => {
+    this.locked = false
+  }
 
   addPlayer = (playerId: string, name: string) => {
     this.players[playerId] = {

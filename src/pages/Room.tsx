@@ -136,7 +136,7 @@ export const Room: React.FC<Props> = ({ roomId, socket, hardMode = false }) => {
 
   return (
     <section
-      className='section'
+      className='section room'
       ref={sectionRef}
       tabIndex={0}
       onKeyDown={handleKeyDown}>

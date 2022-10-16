@@ -6,9 +6,9 @@ import cors from 'cors'
 import { SocketEventTypes } from './types'
 import { Room, Rooms } from './room'
 
-var app: Express = express()
-var http = createServer(app)
-var io = new Server(http, {
+let app: Express = express()
+let http = createServer(app)
+let io = new Server(http, {
   cors: {
     origin: '*',
   },
@@ -44,7 +44,11 @@ app.get('/room/:roomId', (req: Request, res: Response) => {
   const roomId = req.params.roomId
   const room = rooms.getRoom(roomId)
   if (!room) {
-    res.status(404)
+    res.sendStatus(404)
+    return
+  }
+  if (room.getIsLocked()) {
+    res.sendStatus(423)
     return
   }
   const response = {
@@ -77,25 +81,31 @@ io.on('connection', (socket: Socket) => {
       `client with ip address=${clientIpAddress} joining room id=${roomId}`
     )
 
-    socket.join(`${roomId}`)
-
     const room = rooms.getRoom(roomId)
+
+    socket.join(`${roomId}`)
 
     emitToRoom(socket, roomId, SocketEventTypes.RoomJoined, {
       usedLetters: room.getUsedLetters(),
       currentPlayer: room.getCurrentPlayer(),
     })
+  })
+  socket.on(SocketEventTypes.CountdownStarted, (msg: any) => {
+    let { roomId } = JSON.parse(msg)
+    console.log(`room id=${roomId} countdown started`)
+    const room = rooms.getRoom(roomId)
 
-    handleCountdown(socket, room)
+    room.lockRoom()
+    console.log(`room id=${roomId} is now locked...no new players can join`)
   })
 
   socket.on(SocketEventTypes.SelectLetter, (msg: any) => {
-    var { roomId, letter, prevLetter } = JSON.parse(msg)
+    let { roomId, letter, prevLetter } = JSON.parse(msg)
     console.debug(
       `message received from client with ip address=${clientIpAddress} for room=${roomId}, msg=${letter}`
     )
     const room = rooms.getRoom(roomId)
-    var usedLetters = room.addUsedLetter(letter)
+    let usedLetters = room.addUsedLetter(letter)
     if (prevLetter) {
       room.removeUsedLetter(prevLetter)
     }
@@ -104,7 +114,7 @@ io.on('connection', (socket: Socket) => {
   })
 
   socket.on(SocketEventTypes.EndTurn, (msg: any) => {
-    var { roomId, selectedLetter } = JSON.parse(msg)
+    let { roomId, selectedLetter } = JSON.parse(msg)
     const room = rooms.getRoom(roomId)
     room.setNextPlayer()
     room.resetCountdown()
@@ -118,14 +128,14 @@ io.on('connection', (socket: Socket) => {
   })
 
   socket.on(SocketEventTypes.ResetTimer, (msg: any) => {
-    var { roomId } = JSON.parse(msg)
+    let { roomId } = JSON.parse(msg)
     const room = rooms.getRoom(roomId)
     room.resetCountdown()
     handleCountdown(socket, room)
   })
 
   socket.on(SocketEventTypes.LeaveRoom, (msg: any) => {
-    var { roomId, playerId } = JSON.parse(msg)
+    let { roomId, playerId } = JSON.parse(msg)
     // remove player from room
     const room = rooms.getRoom(roomId)
     room.removePlayer(playerId)
