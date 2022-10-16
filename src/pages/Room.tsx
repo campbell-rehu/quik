@@ -6,12 +6,11 @@ import React, {
   useState,
 } from 'react'
 import { Socket } from 'socket.io-client'
-import { Button } from '../components/Button'
 import { LettersEasy, SocketEventType, LettersHard } from '../constants'
 import { StringArrayToBooleanMap } from '../helpers'
 import { Letter } from '../components/Letter'
 import { Timer } from '../components/Timer'
-import { BooleanMap, Page, Player, Routes } from '../types'
+import { BooleanMap, Player, Routes } from '../types'
 import { useNavigationContext } from '../components/NavigationContext'
 
 interface Props {

@@ -7,7 +7,7 @@ export const Splash: React.FC<{}> = () => {
   const { setShowNavBar } = useNavigationContext()
   useEffect(() => {
     setShowNavBar(false)
-  }, [])
+  }, [setShowNavBar])
   return (
     <section className='hero is-large is-success'>
       <div className='hero-body'>
