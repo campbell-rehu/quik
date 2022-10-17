@@ -32,7 +32,10 @@ export const Room: React.FC<Props> = ({ roomId, socket, hardMode = false }) => {
     isTurn: false,
   })
   const [selectedLetter, setSelectedLetter] = useState<string>('')
+  const [gameStarted, setGameStarted] = useState<boolean>(false)
+  const [isInTextMode, setIsInTextMode] = useState<boolean>(false)
   const sectionRef = useRef<HTMLElement>(null)
+  const inputRef = useRef<HTMLInputElement>(null)
 
   const isThisCurrentPlayer = () => socket.id === currentPlayer.id
 
@@ -67,22 +70,43 @@ export const Room: React.FC<Props> = ({ roomId, socket, hardMode = false }) => {
 
   const endTurn = () => {
     if (socket.id === currentPlayer.id) {
-      setResetTimer(true)
-      setSelectedLetter('')
-      socket.emit(
-        SocketEventType.EndTurn,
-        JSON.stringify({ roomId, selectedLetter })
-      )
+      if (selectedLetter !== '') {
+        setResetTimer(true)
+        setSelectedLetter('')
+        socket.emit(
+          SocketEventType.EndTurn,
+          JSON.stringify({ roomId, selectedLetter })
+        )
+        inputRef.current!.value = ''
+      }
+    }
+  }
+
+  const handleTextMode = (e: React.ChangeEvent<HTMLInputElement>) => {
+    if (!gameStarted) return
+    const value = e.target.value
+    if (Boolean(value)) {
+      if (selectedLetter === '') {
+        const keyUpper = value!.charAt(0).toUpperCase()
+        toggleSelectLetter(keyUpper)
+      }
+    } else {
+      if (selectedLetter !== '') {
+        toggleSelectLetter(selectedLetter)
+      }
     }
   }
 
   const handleKeyDown = (e: KeyboardEvent) => {
+    if (!gameStarted) return
     var key = e.key
     if (key === 'Enter') {
       endTurn()
     } else {
-      var keyUpper = key.toUpperCase()
-      toggleSelectLetter(keyUpper)
+      if (!isInTextMode) {
+        const keyUpper = key.toUpperCase()
+        toggleSelectLetter(keyUpper)
+      }
     }
   }
 
@@ -91,6 +115,15 @@ export const Room: React.FC<Props> = ({ roomId, socket, hardMode = false }) => {
       SocketEventType.LeaveRoom,
       JSON.stringify({ roomId, playerId: socket.id })
     )
+  }
+
+  const handleStartGame = () => {
+    setGameStarted(true)
+    if (isInTextMode) {
+      // if we're in text mode focus on the input
+      inputRef.current?.focus()
+    }
+    socket?.emit('countdown-started', JSON.stringify({ roomId }))
   }
 
   useEffect(() => {
@@ -142,14 +175,36 @@ export const Room: React.FC<Props> = ({ roomId, socket, hardMode = false }) => {
       onKeyDown={handleKeyDown}>
       <div className='container'>
         <h1 className='title has-text-centered'>Game room: {roomId}</h1>
-        <Timer reset={resetTimer} />
+        <Timer
+          reset={resetTimer}
+          gameStarted={gameStarted}
+          setGameStarted={handleStartGame}
+          currentPlayer={currentPlayer}
+          isCurrentPlayer={isThisCurrentPlayer()}
+        />
+        {!gameStarted ? (
+          <div className='buttons is-centered'>
+            <button
+              className='button is-primary'
+              onClick={() => {
+                setIsInTextMode(!isInTextMode)
+              }}>
+              {!isInTextMode ? 'Enable' : 'Disable'} text mode
+            </button>
+          </div>
+        ) : null}
+
         <div className='container letters-container has-text-centered mb-4'>
           {Object.keys(letterSet).map((letter) => (
             <Letter
               key={letter}
               label={letter}
               used={letter in usedLetters}
-              toggleSelectLetter={toggleSelectLetter}
+              toggleSelectLetter={(letter: string) => {
+                if (!isInTextMode && gameStarted) {
+                  toggleSelectLetter(letter)
+                }
+              }}
             />
           ))}
         </div>
@@ -164,9 +219,26 @@ export const Room: React.FC<Props> = ({ roomId, socket, hardMode = false }) => {
               {currentPlayer.name}'s turn
             </div>
           </div>
-          <button className='button is-primary' onClick={endTurn}>
-            End Turn
-          </button>
+          {isInTextMode ? (
+            <div className='buttons is-centered'>
+              <div className='control'>
+                <input
+                  id='text-mode-input'
+                  name='text-mode-input'
+                  placeholder='Enter your answer'
+                  onInput={handleTextMode}
+                  disabled={!gameStarted}
+                  className='input is-primary'
+                  type='text'
+                  ref={inputRef}
+                />
+              </div>
+            </div>
+          ) : (
+            <button className='button is-primary' onClick={endTurn}>
+              End Turn
+            </button>
+          )}
         </div>
       </div>
     </section>

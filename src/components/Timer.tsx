@@ -1,26 +1,31 @@
 import classNames from 'classnames'
 import React, { useState } from 'react'
 import { useEffect } from 'react'
+import { Player } from '../types'
 import { useRoomContext } from './RoomContext'
 import { useWebSocketContext } from './WebsocketContext'
 
 interface Props {
   reset: boolean
+  gameStarted: boolean
+  setGameStarted: () => void
+  currentPlayer: Player
+  isCurrentPlayer: boolean
 }
 
-export const Timer: React.FC<Props> = ({ reset }) => {
+export const Timer: React.FC<Props> = ({
+  reset,
+  gameStarted,
+  setGameStarted,
+  currentPlayer,
+  isCurrentPlayer,
+}) => {
   const { socket } = useWebSocketContext()
   const { roomId } = useRoomContext()
   const [seconds, setSeconds] = useState<number>(10)
-  const [timerStarted, setTimerStarted] = useState<boolean>(false)
   const resetTimer = () => {
     setSeconds(10)
-    socket?.emit('reset-timer', JSON.stringify({ roomId }))
-    // Reset focus on the section for keydown listener
-    const roomSection = document
-      .getElementsByClassName('room')
-      .item(0) as HTMLElement
-    roomSection.focus()
+    socket.emit('reset-timer', JSON.stringify({ roomId }))
   }
 
   useEffect(() => {
@@ -31,26 +36,29 @@ export const Timer: React.FC<Props> = ({ reset }) => {
   }, [reset])
 
   useEffect(() => {
-    socket?.on('tick', ({ countdown }) => {
+    socket.on('tick', ({ countdown }) => {
       setSeconds(countdown)
     })
 
     return () => {
-      socket?.off('tick')
+      socket.off('tick')
     }
   }, [socket])
 
   const renderTimer = () => {
-    if (!timerStarted) {
+    if (!gameStarted) {
       return (
         <div className='container'>
           <div className='buttons is-centered'>
             <button
               className='button is-primary'
               onClick={() => {
-                setTimerStarted(true)
-                resetTimer()
-                socket?.emit('countdown-started', JSON.stringify({ roomId }))
+                setGameStarted()
+                // Reset focus on the section for keydown listener
+                const roomSection = document
+                  .getElementsByClassName('room')
+                  .item(0) as HTMLElement
+                roomSection.focus()
               }}>
               Start round
             </button>
@@ -62,7 +70,13 @@ export const Timer: React.FC<Props> = ({ reset }) => {
       <>
         {seconds === 0 ? (
           <div className='container'>
-            <h1 className='title has-text-centered'>Player lost!</h1>
+            <h1 className='title has-text-centered'>
+              {isCurrentPlayer ? (
+                <>You ran out of time!</>
+              ) : (
+                <>{currentPlayer.name} ran out of time!</>
+              )}
+            </h1>
             <div className='buttons is-centered'>
               <button
                 className='button is-primary'

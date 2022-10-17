@@ -97,6 +97,7 @@ io.on('connection', (socket: Socket) => {
 
     room.lockRoom()
     console.log(`room id=${roomId} is now locked...no new players can join`)
+    handleCountdown(socket, room)
   })
 
   socket.on(SocketEventTypes.SelectLetter, (msg: any) => {
