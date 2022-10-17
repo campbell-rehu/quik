@@ -1,11 +1,11 @@
-enum Difficulty {
+export enum Difficulty {
   Easy = 'Easy',
   Moderate = 'Moderate',
   Hard = 'Hard',
   Hardest = 'Hardest',
 }
 
-type Category = {
+export type Category = {
   [Difficulty.Easy]: string[]
   [Difficulty.Moderate]: string[]
   [Difficulty.Hard]: string[]

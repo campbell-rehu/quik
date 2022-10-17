@@ -37,6 +37,7 @@ export const Room: React.FC<Props> = ({
   const [roundStarted, setRoundStarted] = useState<boolean>(false)
   const [isInTextMode, setIsInTextMode] = useState<boolean>(false)
   const [textModeWords, setTextModeWords] = useState<string[]>([])
+  const [category, setCategory] = useState<string>('')
   const sectionRef = useRef<HTMLElement>(null)
   const inputRef = useRef<HTMLInputElement>(null)
 
@@ -76,12 +77,15 @@ export const Room: React.FC<Props> = ({
       if (selectedLetter !== '') {
         setResetTimer(true)
         setSelectedLetter('')
-        let textModeWord = isInTextMode ? inputRef.current!.value : ''
+        let textModeWord = ''
+        if (isInTextMode) {
+          textModeWord = inputRef.current!.value
+          inputRef.current!.value = ''
+        }
         socket.emit(
           SocketEventType.EndTurn,
           JSON.stringify({ roomId, selectedLetter, textModeWord })
         )
-        inputRef.current!.value = ''
       }
     }
   }
@@ -150,7 +154,8 @@ export const Room: React.FC<Props> = ({
       setCurrentPlayer(currentPlayer)
       setTextModeWords(textModeWords)
     })
-    socket.on(SocketEventType.RoundStarted, () => {
+    socket.on(SocketEventType.RoundStarted, ({ category }) => {
+      setCategory(category)
       setRoundStarted(true)
     })
     socket.on(SocketEventType.SetIsInTextMode, (isInTextMode) => {
@@ -267,8 +272,8 @@ export const Room: React.FC<Props> = ({
         </div>
         <div className='container has-text-centered'>
           <div className='block'>
-            <div className='turn-container subtitle is-4'>Topic</div>
-            <div className='topic-container title is-2'>Children's songs</div>
+            <div className='turn-container subtitle is-4'>Category</div>
+            <div className='topic-container title is-2'>{category}</div>
           </div>
           <div className='block'>
             <div className='turn-container subtitle is-4'>Turn</div>

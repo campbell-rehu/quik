@@ -1,4 +1,5 @@
 import { v4 } from 'uuid'
+import { Categories, Difficulty } from './constants'
 
 export class Rooms {
   private rooms: { [roomId: string]: Room }
@@ -72,6 +73,13 @@ export class Room {
     this.players[Object.keys(this.players)[this.currentPlayerIndex]]
   getNumberOfPlayers = () => Object.keys(this.players).length
   getIsLocked = () => this.locked
+  getCategory = () => {
+    const difficulty = Object.keys(Difficulty)[
+      Math.floor(Math.random() * 3)
+    ] as Difficulty
+    const categories = Categories[difficulty]
+    return categories[Math.floor(Math.random() * categories.length - 1)]
+  }
 
   lockRoom = () => {
     this.locked = true

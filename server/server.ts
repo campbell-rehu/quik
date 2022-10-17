@@ -98,7 +98,9 @@ io.on('connection', (socket: Socket) => {
     room.lockRoom()
     console.log(`room id=${roomId} is now locked...no new players can join`)
 
-    emitToRoom(socket, room.getId(), SocketEventTypes.RoundStarted, '')
+    emitToRoom(socket, room.getId(), SocketEventTypes.RoundStarted, {
+      category: room.getCategory(),
+    })
     handleCountdown(socket, room)
   })
 
@@ -152,12 +154,12 @@ io.on('connection', (socket: Socket) => {
   })
 
   socket.on(SocketEventTypes.SetIsInTextMode, (msg: any) => {
-    const { isInTextmode, roomId } = JSON.parse(msg)
+    const { isInTextMode, roomId } = JSON.parse(msg)
     const room = rooms.getRoom(roomId)
 
-    room.setIsInTextMode(isInTextmode)
+    room.setIsInTextMode(isInTextMode)
     emitToRoom(socket, roomId, SocketEventTypes.SetIsInTextMode, {
-      isInTextmode,
+      isInTextMode,
     })
   })
 })
