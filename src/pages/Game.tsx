@@ -1,4 +1,4 @@
-import React, { useEffect, useRef } from 'react'
+import React, { useEffect, useRef, useState } from 'react'
 import './Game.css'
 import {
   useWebSocketContext,
@@ -6,9 +6,10 @@ import {
 } from '../components/WebsocketContext'
 import { Room } from './Room'
 import { useRoomContext } from '../components/RoomContext'
-import { Routes } from '../types'
+import { Player, Routes } from '../types'
 import { InputField } from '../components/InputField'
 import { useNavigationContext } from '../components/NavigationContext'
+import { SocketEventType } from '../constants'
 
 interface Props {
   hardMode?: boolean
@@ -39,6 +40,11 @@ export const Setup: React.FC<Props> = ({ hardMode }) => {
   const setPlayerNameInput = useRef<HTMLInputElement>(null)
   const { roomId, playerName, createRoom, joinRoom, setPlayerName } =
     useRoomContext()
+  const [roomCurrentPlayer, setRoomCurrentPlayer] = useState<Player>({
+    id: socket.id,
+    name: 'Player',
+    isTurn: false,
+  })
 
   useEffect(() => {
     if (socket) {
@@ -49,6 +55,13 @@ export const Setup: React.FC<Props> = ({ hardMode }) => {
       }
     }
   }, [socket, roomId, playerName])
+
+  useEffect(() => {
+    socket.on(SocketEventType.RoomJoined, ({ currentPlayer }) => {
+      console.log({ currentPlayer })
+      setRoomCurrentPlayer(currentPlayer)
+    })
+  }, [socket])
 
   if (!roomId) {
     return (
@@ -102,5 +115,7 @@ export const Setup: React.FC<Props> = ({ hardMode }) => {
     )
   }
 
-  return <Room roomId={roomId} socket={socket} />
+  return (
+    <Room roomId={roomId} socket={socket} currentPlayer={roomCurrentPlayer} />
+  )
 }

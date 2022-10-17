@@ -10,4 +10,8 @@ export const SocketEventTypes = {
   CountdownTick: 'tick',
   ResetTimer: 'reset-timer',
   LeaveRoom: 'leave-room',
+  PlayerEliminated: 'player-eliminated',
+  RoundStarted: 'round-started',
+  RoundEnded: 'round-ended',
+  SetIsInTextMode: 'set-is-in-text-mode',
 }

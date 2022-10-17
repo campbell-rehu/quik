@@ -97,6 +97,8 @@ io.on('connection', (socket: Socket) => {
 
     room.lockRoom()
     console.log(`room id=${roomId} is now locked...no new players can join`)
+
+    emitToRoom(socket, room.getId(), SocketEventTypes.RoundStarted, '')
     handleCountdown(socket, room)
   })
 
@@ -115,17 +117,18 @@ io.on('connection', (socket: Socket) => {
   })
 
   socket.on(SocketEventTypes.EndTurn, (msg: any) => {
-    let { roomId, selectedLetter } = JSON.parse(msg)
+    let { roomId, selectedLetter, textModeWord } = JSON.parse(msg)
     const room = rooms.getRoom(roomId)
     room.setNextPlayer()
     room.resetCountdown()
     room.setLetterUnselectable(selectedLetter)
-    emitToRoom(
-      socket,
-      roomId,
-      SocketEventTypes.StartTurn,
-      room.getCurrentPlayer()
-    )
+    if (Boolean(textModeWord)) {
+      room.addTextModeWord(textModeWord)
+    }
+    emitToRoom(socket, roomId, SocketEventTypes.StartTurn, {
+      currentPlayer: room.getCurrentPlayer(),
+      textModeWords: room.getTextModeWords(),
+    })
   })
 
   socket.on(SocketEventTypes.ResetTimer, (msg: any) => {
@@ -146,6 +149,16 @@ io.on('connection', (socket: Socket) => {
       rooms.removeRoom(roomId)
     }
     // TODO: handle setting player turn if current player leaves the room
+  })
+
+  socket.on(SocketEventTypes.SetIsInTextMode, (msg: any) => {
+    const { isInTextmode, roomId } = JSON.parse(msg)
+    const room = rooms.getRoom(roomId)
+
+    room.setIsInTextMode(isInTextmode)
+    emitToRoom(socket, roomId, SocketEventTypes.SetIsInTextMode, {
+      isInTextmode,
+    })
   })
 })
 
@@ -183,6 +196,20 @@ const handleCountdown = (socket: Socket, room: Room) => {
     })
     if (countdown.time === 0) {
       clearInterval(countdown.timer)
+      console.log('eliminating player')
+      const eliminatedPlayer = room.eliminateCurrentPlayer()
+      room.setNextPlayer()
+      emitToRoom(socket, room.getId(), SocketEventTypes.PlayerEliminated, {
+        eliminatedPlayer: eliminatedPlayer,
+      })
+      if (room.getRemainingPlayerCount() === 1) {
+        console.log('ending round...')
+        const winningPlayer = room.getRemainingPlayer()
+        room.endRound()
+        emitToRoom(socket, room.getId(), SocketEventTypes.RoundEnded, {
+          winningPlayer,
+        })
+      }
     }
   }, 1000)
 }

@@ -16,24 +16,27 @@ import { useNavigationContext } from '../components/NavigationContext'
 interface Props {
   roomId: string
   socket: Socket
+  currentPlayer: Player
   hardMode?: boolean
 }
 
-export const Room: React.FC<Props> = ({ roomId, socket, hardMode = false }) => {
+export const Room: React.FC<Props> = ({
+  roomId,
+  socket,
+  currentPlayer: currentPlayerInit,
+  hardMode = false,
+}) => {
   const { setShowNavBar, setNavItems } = useNavigationContext()
   const [usedLetters, setUsedLetters] = useState<BooleanMap>({})
   const [letterSet, setLetterSet] = useState<BooleanMap>(
     StringArrayToBooleanMap(Object.values(LettersEasy))
   )
   const [resetTimer, setResetTimer] = useState<boolean>(false)
-  const [currentPlayer, setCurrentPlayer] = useState<Player>({
-    id: socket.id,
-    name: 'Player',
-    isTurn: false,
-  })
+  const [currentPlayer, setCurrentPlayer] = useState<Player>(currentPlayerInit)
   const [selectedLetter, setSelectedLetter] = useState<string>('')
-  const [gameStarted, setGameStarted] = useState<boolean>(false)
+  const [roundStarted, setRoundStarted] = useState<boolean>(false)
   const [isInTextMode, setIsInTextMode] = useState<boolean>(false)
+  const [textModeWords, setTextModeWords] = useState<string[]>([])
   const sectionRef = useRef<HTMLElement>(null)
   const inputRef = useRef<HTMLInputElement>(null)
 
@@ -73,9 +76,10 @@ export const Room: React.FC<Props> = ({ roomId, socket, hardMode = false }) => {
       if (selectedLetter !== '') {
         setResetTimer(true)
         setSelectedLetter('')
+        let textModeWord = isInTextMode ? inputRef.current!.value : ''
         socket.emit(
           SocketEventType.EndTurn,
-          JSON.stringify({ roomId, selectedLetter })
+          JSON.stringify({ roomId, selectedLetter, textModeWord })
         )
         inputRef.current!.value = ''
       }
@@ -83,7 +87,7 @@ export const Room: React.FC<Props> = ({ roomId, socket, hardMode = false }) => {
   }
 
   const handleTextMode = (e: React.ChangeEvent<HTMLInputElement>) => {
-    if (!gameStarted) return
+    if (!roundStarted) return
     const value = e.target.value
     if (Boolean(value)) {
       if (selectedLetter === '') {
@@ -98,7 +102,7 @@ export const Room: React.FC<Props> = ({ roomId, socket, hardMode = false }) => {
   }
 
   const handleKeyDown = (e: KeyboardEvent) => {
-    if (!gameStarted) return
+    if (!roundStarted) return
     var key = e.key
     if (key === 'Enter') {
       endTurn()
@@ -118,12 +122,20 @@ export const Room: React.FC<Props> = ({ roomId, socket, hardMode = false }) => {
   }
 
   const handleStartGame = () => {
-    setGameStarted(true)
+    setRoundStarted(true)
     if (isInTextMode) {
       // if we're in text mode focus on the input
       inputRef.current?.focus()
     }
-    socket?.emit('countdown-started', JSON.stringify({ roomId }))
+    socket?.emit(SocketEventType.CountdownStarted, JSON.stringify({ roomId }))
+  }
+
+  const handleSetIsTextMode = () => {
+    setIsInTextMode(!isInTextMode)
+    socket?.emit(
+      SocketEventType.SetIsInTextMode,
+      JSON.stringify({ isInTextMode, roomId })
+    )
   }
 
   useEffect(() => {
@@ -134,8 +146,15 @@ export const Room: React.FC<Props> = ({ roomId, socket, hardMode = false }) => {
       setUsedLetters(usedLetters)
       setCurrentPlayer(currentPlayer)
     })
-    socket.on(SocketEventType.StartTurn, (currentPlayer) => {
+    socket.on(SocketEventType.StartTurn, ({ textModeWords, currentPlayer }) => {
       setCurrentPlayer(currentPlayer)
+      setTextModeWords(textModeWords)
+    })
+    socket.on(SocketEventType.RoundStarted, () => {
+      setRoundStarted(true)
+    })
+    socket.on(SocketEventType.SetIsInTextMode, (isInTextMode) => {
+      setIsInTextMode(isInTextMode)
     })
     return () => {
       socket.off(SocketEventType.LetterSelected)
@@ -167,6 +186,8 @@ export const Room: React.FC<Props> = ({ roomId, socket, hardMode = false }) => {
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [setShowNavBar, setNavItems])
 
+  useEffect(() => setCurrentPlayer(currentPlayerInit), [currentPlayerInit])
+
   return (
     <section
       className='section room'
@@ -175,25 +196,61 @@ export const Room: React.FC<Props> = ({ roomId, socket, hardMode = false }) => {
       onKeyDown={handleKeyDown}>
       <div className='container'>
         <h1 className='title has-text-centered'>Game room: {roomId}</h1>
-        <Timer
-          reset={resetTimer}
-          gameStarted={gameStarted}
-          setGameStarted={handleStartGame}
-          currentPlayer={currentPlayer}
-          isCurrentPlayer={isThisCurrentPlayer()}
-        />
-        {!gameStarted ? (
-          <div className='buttons is-centered'>
-            <button
-              className='button is-primary'
-              onClick={() => {
-                setIsInTextMode(!isInTextMode)
-              }}>
-              {!isInTextMode ? 'Enable' : 'Disable'} text mode
-            </button>
+        {!roundStarted ? (
+          <div className='container block'>
+            <div className='buttons is-centered'>
+              <button
+                className='button is-primary'
+                onClick={() => {
+                  handleStartGame()
+                  // Reset focus on the section for keydown listener
+                  const roomSection = document
+                    .getElementsByClassName('room')
+                    .item(0) as HTMLElement
+                  roomSection.focus()
+                }}>
+                Start round
+              </button>
+            </div>
+            <div className='buttons is-centered'>
+              <button
+                className='button is-primary'
+                onClick={handleSetIsTextMode}>
+                {!isInTextMode ? 'Enable' : 'Disable'} text mode
+              </button>
+            </div>
           </div>
-        ) : null}
-
+        ) : (
+          <Timer
+            reset={resetTimer}
+            currentPlayer={currentPlayer}
+            isCurrentPlayer={isThisCurrentPlayer()}
+          />
+        )}
+        {isInTextMode ? (
+          <div className='buttons is-centered'>
+            <div className='control'>
+              <input
+                id='text-mode-input'
+                name='text-mode-input'
+                placeholder='Enter your answer'
+                onInput={handleTextMode}
+                disabled={!roundStarted}
+                className='input is-primary'
+                type='text'
+                ref={inputRef}
+              />
+            </div>
+          </div>
+        ) : (
+          roundStarted && (
+            <div className='buttons is-centered'>
+              <button className='button is-primary' onClick={endTurn}>
+                End Turn
+              </button>
+            </div>
+          )
+        )}
         <div className='container letters-container has-text-centered mb-4'>
           {Object.keys(letterSet).map((letter) => (
             <Letter
@@ -201,7 +258,7 @@ export const Room: React.FC<Props> = ({ roomId, socket, hardMode = false }) => {
               label={letter}
               used={letter in usedLetters}
               toggleSelectLetter={(letter: string) => {
-                if (!isInTextMode && gameStarted) {
+                if (!isInTextMode && roundStarted) {
                   toggleSelectLetter(letter)
                 }
               }}
@@ -219,26 +276,17 @@ export const Room: React.FC<Props> = ({ roomId, socket, hardMode = false }) => {
               {currentPlayer.name}'s turn
             </div>
           </div>
+          {/* TODO: imrove the UI for displaying the text mode answers */}
           {isInTextMode ? (
-            <div className='buttons is-centered'>
-              <div className='control'>
-                <input
-                  id='text-mode-input'
-                  name='text-mode-input'
-                  placeholder='Enter your answer'
-                  onInput={handleTextMode}
-                  disabled={!gameStarted}
-                  className='input is-primary'
-                  type='text'
-                  ref={inputRef}
-                />
-              </div>
+            <div className='block content'>
+              <p className='title is-3'>Answers</p>
+              <ul>
+                {textModeWords.map((word) => (
+                  <li key={word}>{word}</li>
+                ))}
+              </ul>
             </div>
-          ) : (
-            <button className='button is-primary' onClick={endTurn}>
-              End Turn
-            </button>
-          )}
+          ) : null}
         </div>
       </div>
     </section>

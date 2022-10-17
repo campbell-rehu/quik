@@ -7,16 +7,12 @@ import { useWebSocketContext } from './WebsocketContext'
 
 interface Props {
   reset: boolean
-  gameStarted: boolean
-  setGameStarted: () => void
   currentPlayer: Player
   isCurrentPlayer: boolean
 }
 
 export const Timer: React.FC<Props> = ({
   reset,
-  gameStarted,
-  setGameStarted,
   currentPlayer,
   isCurrentPlayer,
 }) => {
@@ -46,26 +42,6 @@ export const Timer: React.FC<Props> = ({
   }, [socket])
 
   const renderTimer = () => {
-    if (!gameStarted) {
-      return (
-        <div className='container'>
-          <div className='buttons is-centered'>
-            <button
-              className='button is-primary'
-              onClick={() => {
-                setGameStarted()
-                // Reset focus on the section for keydown listener
-                const roomSection = document
-                  .getElementsByClassName('room')
-                  .item(0) as HTMLElement
-                roomSection.focus()
-              }}>
-              Start round
-            </button>
-          </div>
-        </div>
-      )
-    }
     return (
       <>
         {seconds === 0 ? (

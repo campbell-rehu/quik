@@ -29,6 +29,8 @@ export class Room {
       id: string
       name: string
       isTurn: boolean
+      eliminated: boolean
+      winCount: number
     }
   }
   // The boolean in usedLetters denotes whether the letter can be de-selected
@@ -44,6 +46,8 @@ export class Room {
   }
   private currentPlayerIndex: number
   private locked: boolean
+  private isInTextMode: boolean
+  private textModeWords: string[]
 
   constructor(roomId: string) {
     this.roomId = roomId
@@ -56,6 +60,8 @@ export class Room {
     }
     this.currentPlayerIndex = 0
     this.locked = false
+    this.isInTextMode = false
+    this.textModeWords = []
   }
 
   getId = () => this.roomId
@@ -79,6 +85,8 @@ export class Room {
       id: playerId,
       name,
       isTurn: false,
+      eliminated: false,
+      winCount: 0,
     }
   }
   addUsedLetter = (letter: string) => {
@@ -105,8 +113,19 @@ export class Room {
       time: 10,
     }
   }
+  resetUsedLetters = () => {
+    this.usedLetters = {}
+  }
   setLetterUnselectable = (letter: string) => {
     this.usedLetters[letter] = false
+  }
+  getIsInTextMode = () => this.isInTextMode
+  setIsInTextMode = (isInTextMode: boolean) => {
+    this.isInTextMode = isInTextMode
+  }
+  getTextModeWords = () => this.textModeWords
+  addTextModeWord = (word: string) => {
+    this.textModeWords.push(word)
   }
   setNextPlayer = () => {
     const playerIds = Object.keys(this.players)
@@ -128,5 +147,34 @@ export class Room {
     if (Boolean(this.players[playerId])) {
       delete this.players[playerId]
     }
+  }
+  eliminateCurrentPlayer = () => {
+    this.getCurrentPlayer().eliminated = true
+    return this.getCurrentPlayer()
+  }
+  getRemainingPlayerCount = () => {
+    return Object.keys(this.players).filter((k) => !this.players[k].eliminated)
+      .length
+  }
+  getRemainingPlayer = () => {
+    const remainingPlayerKey = Object.keys(this.players).filter(
+      (k) => !this.players[k].eliminated
+    )[0]
+    return this.players[remainingPlayerKey]
+  }
+  endRound = () => {
+    // Increment last remaining player's winCount
+    const lastPlayerKey = Object.keys(this.players).filter(
+      (k) => !this.players[k].eliminated
+    )[0]
+    this.players[lastPlayerKey].winCount++
+    // reset the countdown
+    this.resetCountdown()
+    // reset usedLetters
+    this.resetUsedLetters()
+    // reset all players eliminated status
+    Object.keys(this.players)
+      .filter((k) => this.players[k].eliminated)
+      .forEach((v) => (this.players[v].eliminated = false))
   }
 }
