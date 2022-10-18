@@ -20,7 +20,6 @@ app.use(cors({ origin: '*' }))
 app.use(express.json())
 
 app.set('trust-proxy', (ip: string) => {
-  console.log({ ip })
   if (process.env.NODE_ENV === 'production') {
     return ip === process.env.PROXY_IP_ADDRESS
   }
@@ -88,6 +87,7 @@ io.on('connection', (socket: Socket) => {
     emitToRoom(socket, roomId, SocketEventTypes.RoomJoined, {
       usedLetters: room.getUsedLetters(),
       currentPlayer: room.getCurrentPlayer(),
+      playerCount: room.getNumberOfPlayers(),
     })
   })
   socket.on(SocketEventTypes.CountdownStarted, (msg: any) => {
@@ -100,6 +100,8 @@ io.on('connection', (socket: Socket) => {
 
     emitToRoom(socket, room.getId(), SocketEventTypes.RoundStarted, {
       category: room.getCategory(),
+      usedLetters: room.getUsedLetters(),
+      currentPlayer: room.getCurrentPlayer(),
     })
     handleCountdown(socket, room)
   })
@@ -207,10 +209,22 @@ const handleCountdown = (socket: Socket, room: Room) => {
       if (room.getRemainingPlayerCount() === 1) {
         console.log('ending round...')
         const winningPlayer = room.getRemainingPlayer()
-        room.endRound()
-        emitToRoom(socket, room.getId(), SocketEventTypes.RoundEnded, {
-          winningPlayer,
-        })
+        room.increasePlayerWinCount(winningPlayer.id)
+        if (!room.hasGameWinner()) {
+          room.endRound()
+          emitToRoom(socket, room.getId(), SocketEventTypes.RoundEnded, {
+            winningPlayer,
+          })
+        } else {
+          const winningPlayer = room.getGameWinner()
+          room.endGame()
+          emitToRoom(socket, room.getId(), SocketEventTypes.GameEnded, {
+            gameWinner: winningPlayer,
+            usedLetters: room.getUsedLetters(),
+            currentPlayer: room.getCurrentPlayer(),
+            playerCount: room.getNumberOfPlayers(),
+          })
+        }
       }
     }
   }, 1000)

@@ -23,16 +23,18 @@ export class Rooms {
   }
 }
 
+export type Player = {
+  id: string
+  name: string
+  isTurn: boolean
+  eliminated: boolean
+  winCount: number
+}
+
 export class Room {
   private roomId: string
   private players: {
-    [playerId: string]: {
-      id: string
-      name: string
-      isTurn: boolean
-      eliminated: boolean
-      winCount: number
-    }
+    [playerId: string]: Player
   }
   // The boolean in usedLetters denotes whether the letter can be de-selected
   // This is the case when it is the current player's turn and they have not
@@ -49,7 +51,7 @@ export class Room {
   private locked: boolean
   private isInTextMode: boolean
   private textModeWords: string[]
-
+  private gameWinCount: number = 1
   constructor(roomId: string) {
     this.roomId = roomId
     this.players = {}
@@ -74,11 +76,18 @@ export class Room {
   getNumberOfPlayers = () => Object.keys(this.players).length
   getIsLocked = () => this.locked
   getCategory = () => {
+    const randomDifficultyIndex = Math.floor(
+      Math.random() * Object.keys(Difficulty).length
+    )
     const difficulty = Object.keys(Difficulty)[
-      Math.floor(Math.random() * 3)
+      randomDifficultyIndex
     ] as Difficulty
     const categories = Categories[difficulty]
-    return categories[Math.floor(Math.random() * categories.length - 1)]
+    const randomCategoriesIndex = Math.floor(
+      Math.random() * (categories.length - 1)
+    )
+    const category = categories[randomCategoriesIndex]
+    return category
   }
 
   lockRoom = () => {
@@ -170,12 +179,10 @@ export class Room {
     )[0]
     return this.players[remainingPlayerKey]
   }
+  increasePlayerWinCount = (playerId: string) => {
+    this.players[playerId].winCount++
+  }
   endRound = () => {
-    // Increment last remaining player's winCount
-    const lastPlayerKey = Object.keys(this.players).filter(
-      (k) => !this.players[k].eliminated
-    )[0]
-    this.players[lastPlayerKey].winCount++
     // reset the countdown
     this.resetCountdown()
     // reset usedLetters
@@ -184,5 +191,32 @@ export class Room {
     Object.keys(this.players)
       .filter((k) => this.players[k].eliminated)
       .forEach((v) => (this.players[v].eliminated = false))
+  }
+  setGameWinCount = (count: number) => {
+    this.gameWinCount = count
+  }
+  getGameWinner = (): Player | null => {
+    const gameWinnerKey = Object.keys(this.players)
+      .filter((k) => this.players[k].winCount === this.gameWinCount)
+      .map((k) => k)[0]
+    if (!gameWinnerKey) {
+      return null
+    }
+    return this.players[gameWinnerKey]
+  }
+  hasGameWinner = () => {
+    return Boolean(this.getGameWinner())
+  }
+  endGame = () => {
+    this.resetCountdown()
+    // reset usedLetters
+    this.resetUsedLetters()
+    // reset all players eliminated status
+    Object.keys(this.players)
+      .filter((k) => this.players[k].eliminated)
+      .forEach((v) => {
+        this.players[v].eliminated = false
+        this.players[v].winCount = 0
+      })
   }
 }

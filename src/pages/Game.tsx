@@ -45,6 +45,8 @@ export const Setup: React.FC<Props> = ({ hardMode }) => {
     name: 'Player',
     isTurn: false,
   })
+  const [roomHasEnoughPlayers, setRoomHasEnoughPlayers] =
+    useState<boolean>(false)
 
   useEffect(() => {
     if (socket) {
@@ -57,9 +59,9 @@ export const Setup: React.FC<Props> = ({ hardMode }) => {
   }, [socket, roomId, playerName])
 
   useEffect(() => {
-    socket.on(SocketEventType.RoomJoined, ({ currentPlayer }) => {
-      console.log({ currentPlayer })
+    socket.on(SocketEventType.RoomJoined, ({ currentPlayer, playerCount }) => {
       setRoomCurrentPlayer(currentPlayer)
+      setRoomHasEnoughPlayers(playerCount > 1)
     })
   }, [socket])
 
@@ -116,6 +118,11 @@ export const Setup: React.FC<Props> = ({ hardMode }) => {
   }
 
   return (
-    <Room roomId={roomId} socket={socket} currentPlayer={roomCurrentPlayer} />
+    <Room
+      roomId={roomId}
+      socket={socket}
+      currentPlayer={roomCurrentPlayer}
+      roomHasEnoughPlayers={roomHasEnoughPlayers}
+    />
   )
 }

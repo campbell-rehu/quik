@@ -67,6 +67,8 @@ export enum SocketEventType {
   StartTurn = 'start-turn',
   LeaveRoom = 'leave-room',
   RoundStarted = 'round-started',
+  RoundEnded = 'round-ended',
   CountdownStarted = 'countdown-started',
   SetIsInTextMode = 'set-is-in-text-mode',
+  GameEnded = 'game-ended',
 }
