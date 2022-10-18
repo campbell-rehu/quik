@@ -11,7 +11,7 @@ test-fe:
   stage: front-end
   rules:
     - changes:
-      - 'src/*'
+      - 'src/**/*'
   script:
     - npm install
     - CI=true npm test
@@ -23,7 +23,7 @@ build-fe:
   environment: production
   rules:
     - changes:
-      - 'src/*'
+      - 'src/**/*'
   script:
     - npm install
     - SERVER=$QUIK_SERVER_URL BUILD_PATH=./fe-build npm run build
@@ -38,7 +38,7 @@ build-be:
   environment: production
   rules:
     - changes:
-      - 'server/*'
+      - 'server/**/*'
   script:
     - cd server/
     - npm install
@@ -58,7 +58,7 @@ docker_front_end_image_build_branch:
   rules:
     - if: $CI_COMMIT_BRANCH != "main"
       changes:
-        - 'src/*'
+        - 'src/**/*'
       when: always
   environment: production
   script:
@@ -74,7 +74,7 @@ docker_back_end_image_build_branch:
   rules:
     - if: $CI_COMMIT_BRANCH != "main"
       changes:
-        - 'server/*'
+        - 'server/**/*'
       when: always
   environment: production
   script:
@@ -91,7 +91,7 @@ docker_front_end_image_build_release:
   rules:
     - if: $CI_COMMIT_BRANCH == "main"
       changes:
-        - 'src/*'
+        - 'src/**/*'
       when: always
   environment: production
   script:
@@ -107,7 +107,7 @@ docker_back_end_image_build_release:
   rules:
     - if: $CI_COMMIT_BRANCH == "main"
       changes:
-        - 'server/*'
+        - 'server/**/*'
       when: always
   environment: production
   script:
