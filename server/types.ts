@@ -14,4 +14,5 @@ export const SocketEventTypes = {
   RoundStarted: 'round-started',
   RoundEnded: 'round-ended',
   SetIsInTextMode: 'set-is-in-text-mode',
+  GameEnded: 'game-ended',
 }
