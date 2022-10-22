@@ -102,6 +102,7 @@ io.on('connection', (socket: Socket) => {
       category: room.getCategory(),
       usedLetters: room.getUsedLetters(),
       currentPlayer: room.getCurrentPlayer(),
+      textModeWords: room.getTextModeWords(),
     })
     handleCountdown(socket, room)
   })
@@ -131,6 +132,7 @@ io.on('connection', (socket: Socket) => {
     }
     emitToRoom(socket, roomId, SocketEventTypes.StartTurn, {
       currentPlayer: room.getCurrentPlayer(),
+      usedLetters: room.getUsedLetters(),
       textModeWords: room.getTextModeWords(),
     })
   })

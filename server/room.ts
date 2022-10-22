@@ -133,6 +133,9 @@ export class Room {
   resetUsedLetters = () => {
     this.usedLetters = {}
   }
+  resetTextModeWords = () => {
+    this.textModeWords = []
+  }
   setLetterUnselectable = (letter: string) => {
     this.usedLetters[letter] = false
   }
@@ -191,6 +194,8 @@ export class Room {
     Object.keys(this.players)
       .filter((k) => this.players[k].eliminated)
       .forEach((v) => (this.players[v].eliminated = false))
+    // reset all textMode words
+    this.resetTextModeWords()
   }
   setGameWinCount = (count: number) => {
     this.gameWinCount = count
@@ -218,5 +223,7 @@ export class Room {
         this.players[v].eliminated = false
         this.players[v].winCount = 0
       })
+    // reset all textMode words
+    this.resetTextModeWords()
   }
 }

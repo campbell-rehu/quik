@@ -12,6 +12,7 @@ import { Letter } from '../components/Letter'
 import { Timer } from '../components/Timer'
 import { BooleanMap, Player, Routes } from '../types'
 import { useNavigationContext } from '../components/NavigationContext'
+import classNames from 'classnames'
 
 interface Props {
   roomId: string
@@ -45,15 +46,16 @@ export const Room: React.FC<Props> = ({
     roomHasEnoughPlayersInit
   )
   const [category, setCategory] = useState<string>('')
+  const [textModeError, setTextModeError] = useState<string>('')
   const sectionRef = useRef<HTMLElement>(null)
   const inputRef = useRef<HTMLInputElement>(null)
 
   const isThisCurrentPlayer = () => socket.id === currentPlayer.id
 
   const canSelectLetter = (letter: string) =>
-    isLetterSeletable(letter) || !isLetterUsed(letter)
+    isLetterSelectable(letter) || !isLetterUsed(letter)
 
-  const isLetterSeletable = (letter: string) =>
+  const isLetterSelectable = (letter: string) =>
     letter in usedLetters && usedLetters[letter] === true
 
   const isLetterUsed = (letter: string) => letter in usedLetters
@@ -81,18 +83,19 @@ export const Room: React.FC<Props> = ({
 
   const endTurn = () => {
     if (socket.id === currentPlayer.id) {
-      if (selectedLetter !== '') {
-        setResetTimer(true)
-        setSelectedLetter('')
+      if (selectedLetter !== '' && canSelectLetter(selectedLetter)) {
         let textModeWord = ''
         if (isInTextMode) {
           textModeWord = inputRef.current!.value
           inputRef.current!.value = ''
+          setTextModeWords((prev) => [...prev, textModeWord])
         }
         socket.emit(
           SocketEventType.EndTurn,
           JSON.stringify({ roomId, selectedLetter, textModeWord })
         )
+        setResetTimer(true)
+        setSelectedLetter('')
       }
     }
   }
@@ -101,14 +104,19 @@ export const Room: React.FC<Props> = ({
     if (!roundStarted) return
     const value = e.target.value
     if (Boolean(value)) {
-      if (selectedLetter === '') {
-        const keyUpper = value!.charAt(0).toUpperCase()
-        toggleSelectLetter(keyUpper)
+      const keyUpper = value!.charAt(0).toUpperCase()
+      if (canSelectLetter(keyUpper)) {
+        if (selectedLetter === '') {
+          toggleSelectLetter(keyUpper)
+        }
+      } else {
+        setTextModeError(`The letter ʻ${keyUpper}ʻ has already been used`)
       }
     } else {
       if (selectedLetter !== '') {
-        toggleSelectLetter(selectedLetter)
+        toggleSelectLetter(value)
       }
+      setTextModeError('')
     }
   }
 
@@ -164,19 +172,24 @@ export const Room: React.FC<Props> = ({
         setRoomHasEnoughPlayers(playerCount > 1)
       }
     )
-    socket.on(SocketEventType.StartTurn, ({ textModeWords, currentPlayer }) => {
-      setCurrentPlayer(currentPlayer)
-      setTextModeWords(textModeWords)
-    })
+    socket.on(
+      SocketEventType.StartTurn,
+      ({ textModeWords, usedLetters, currentPlayer }) => {
+        setUsedLetters(usedLetters)
+        setCurrentPlayer(currentPlayer)
+        setTextModeWords(textModeWords)
+      }
+    )
     socket.on(
       SocketEventType.RoundStarted,
-      ({ category, usedLetters, currentPlayer }) => {
+      ({ category, usedLetters, currentPlayer, textModeWords }) => {
         setGameWinner(null)
         setRoundWinner(null)
         setCategory(category)
         setRoundStarted(true)
         setUsedLetters(usedLetters)
         setCurrentPlayer(currentPlayer)
+        setTextModeWords(textModeWords)
       }
     )
     socket.on(SocketEventType.SetIsInTextMode, ({ isInTextMode }) => {
@@ -319,10 +332,16 @@ export const Room: React.FC<Props> = ({
                       placeholder='Enter your answer'
                       onInput={handleTextMode}
                       disabled={!roundStarted}
-                      className='input is-primary'
+                      className={classNames('input', {
+                        'is-primary': !Boolean(textModeError),
+                        'is-danger': Boolean(textModeError),
+                      })}
                       type='text'
                       ref={inputRef}
                     />
+                    {Boolean(textModeError) ? (
+                      <p className='help is-danger'>{textModeError}</p>
+                    ) : null}
                   </div>
                 </div>
               ) : (
