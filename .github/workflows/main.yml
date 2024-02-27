@@ -25,6 +25,7 @@ jobs:
   build:
     name: build front-end
     runs-on: self-hosted
+    needs: test
     steps:
     - uses: actions/checkout@v1
     - name: Use Node.js
@@ -35,6 +36,12 @@ jobs:
       run: |
         npm install
         SERVER=$QUIK_SERVER_URL BUILD_PATH=./fe-build npm run build
+    - name: Upload front-end build artifacts
+      uses: actions/upload-artifact@v4
+      with:
+        name: front-end build
+        path: fe-build
+        retention-days: 5
   build_tag_push_to_ghcr:
     runs-on: self-hosted
     needs: [test, build]
