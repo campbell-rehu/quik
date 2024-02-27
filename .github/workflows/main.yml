@@ -50,6 +50,9 @@ jobs:
         uses: actions/download-artifact@v4
         with:
           name: fe-build
+          path: /home/campbellrehu/dev/actions-runner/_work/quik/quik/
+      - name: Display structure of downloaded files
+        run: ls -R
       - name: Build, Tag and Push Docker Image to GHCR
         uses: GlueOps/github-actions-build-push-containers@main
     
