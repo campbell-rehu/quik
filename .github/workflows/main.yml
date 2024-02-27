@@ -39,13 +39,17 @@ jobs:
     - name: Upload front-end build artifacts
       uses: actions/upload-artifact@v4
       with:
-        name: front-end build
+        name: fe-build
         path: fe-build
         retention-days: 5
   build_tag_push_to_ghcr:
     runs-on: self-hosted
     needs: [test, build]
     steps:
+      - name: Download front-end build artifacts
+        uses: actions/download-artifact@v4
+        with:
+          name: fe-build
       - name: Build, Tag and Push Docker Image to GHCR
         uses: GlueOps/github-actions-build-push-containers@main
     
