@@ -1,5 +1,10 @@
 on:
-  workflow_dispatch:
+  pull_request:
+    branches:
+    - main
+  push:
+    branches:
+    - main
 
 jobs:
   test:
@@ -10,7 +15,7 @@ jobs:
     - name: Use Node.js
       uses: actions/setup-node@v1
       with:
-        node-version: 12
+        node-version: 20
     - name: test front-end
       run: |
         npm install
