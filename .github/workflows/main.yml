@@ -31,7 +31,7 @@ jobs:
       uses: actions/setup-node@v4.0.2
       with:
         node-version: 20
-    - name: test front-end
+    - name: build front-end
       run: |
         npm install
         SERVER=$QUIK_SERVER_URL BUILD_PATH=./fe-build npm run build
