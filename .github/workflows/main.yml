@@ -35,4 +35,9 @@ jobs:
       run: |
         npm install
         SERVER=$QUIK_SERVER_URL BUILD_PATH=./fe-build npm run build
+  build_tag_push_to_ghcr:
+    runs-on: self-hosted
+    steps:
+      - name: Build, Tag and Push Docker Image to GHCR
+        uses: GlueOps/github-actions-build-push-containers@main
     
