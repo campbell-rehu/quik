@@ -3,45 +3,45 @@ name: Build & Test
 on:
   pull_request:
     branches:
-    - main
+      - main
   push:
     branches:
-    - main
+      - main
 
 jobs:
   test:
     name: test front-end
     runs-on: self-hosted
     steps:
-    - uses: actions/checkout@v1
-    - name: Use Node.js
-      uses: actions/setup-node@v4.0.2
-      with:
-        node-version: 20
-    - name: test front-end
-      run: |
-        npm install
-        CI=true npm test
+      - uses: actions/checkout@v1
+      - name: Use Node.js
+        uses: actions/setup-node@v4.0.2
+        with:
+          node-version: 20
+      - name: test front-end
+        run: |
+          npm install
+          CI=true npm test
   build:
     name: build front-end
     runs-on: self-hosted
     needs: test
     steps:
-    - uses: actions/checkout@v1
-    - name: Use Node.js
-      uses: actions/setup-node@v4.0.2
-      with:
-        node-version: 20
-    - name: build front-end
-      run: |
-        npm install
-        SERVER=$QUIK_SERVER_URL BUILD_PATH=./fe-build npm run build
-    - name: Upload front-end build artifacts
-      uses: actions/upload-artifact@v4
-      with:
-        name: fe-build
-        path: fe-build
-        retention-days: 5
+      - uses: actions/checkout@v1
+      - name: Use Node.js
+        uses: actions/setup-node@v4.0.2
+        with:
+          node-version: 20
+      - name: build front-end
+        run: |
+          npm install
+          SERVER=$QUIK_SERVER_URL BUILD_PATH=./fe-build npm run build
+      - name: Upload front-end build artifacts
+        uses: actions/upload-artifact@v4
+        with:
+          name: fe-build
+          path: fe-build
+          retention-days: 5
   build_tag_push_to_ghcr:
     runs-on: self-hosted
     needs: [test, build]
@@ -55,4 +55,3 @@ jobs:
         run: ls -R
       - name: Build, Tag and Push Docker Image to GHCR
         uses: GlueOps/github-actions-build-push-containers@main
-    
