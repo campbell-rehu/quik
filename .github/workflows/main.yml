@@ -54,4 +54,4 @@ jobs:
       - name: Display structure of downloaded files
         run: ls -R
       - name: Build, Tag and Push Docker Image to GHCR
-        uses: Gfatjyc/push-gcr-action@v3.0
+        uses: pmorelli92/github-container-registry-build-push@2.1.0
