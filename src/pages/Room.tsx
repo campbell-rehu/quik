@@ -4,22 +4,22 @@ import React, {
   useEffect,
   useRef,
   useState,
-} from 'react'
-import { Socket } from 'socket.io-client'
-import { LettersEasy, SocketEventType, LettersHard } from '../constants'
-import { StringArrayToBooleanMap } from '../helpers'
-import { Letter } from '../components/Letter'
-import { Timer } from '../components/Timer'
-import { BooleanMap, Player, Routes } from '../types'
-import { useNavigationContext } from '../components/NavigationContext'
-import classNames from 'classnames'
+} from "react";
+import { Socket } from "socket.io-client";
+import { LettersEasy, SocketEventType, LettersHard } from "../constants";
+import { StringArrayToBooleanMap } from "../helpers";
+import { Letter } from "../components/Letter";
+import { Timer } from "../components/Timer";
+import { BooleanMap, Player, Routes } from "../types";
+import { useNavigationContext } from "../components/NavigationContext";
+import classNames from "classnames";
 
 interface Props {
-  roomId: string
-  socket: Socket
-  currentPlayer: Player
-  roomHasEnoughPlayers: boolean
-  hardMode?: boolean
+  roomId: string;
+  socket: Socket;
+  currentPlayer: Player;
+  roomHasEnoughPlayers: boolean;
+  hardMode?: boolean;
 }
 
 export const Room: React.FC<Props> = ({
@@ -29,38 +29,38 @@ export const Room: React.FC<Props> = ({
   roomHasEnoughPlayers: roomHasEnoughPlayersInit,
   hardMode = false,
 }) => {
-  const { setShowNavBar, setNavItems } = useNavigationContext()
-  const [usedLetters, setUsedLetters] = useState<BooleanMap>({})
+  const { setShowNavBar, setNavItems } = useNavigationContext();
+  const [usedLetters, setUsedLetters] = useState<BooleanMap>({});
   const [letterSet, setLetterSet] = useState<BooleanMap>(
-    StringArrayToBooleanMap(Object.values(LettersEasy))
-  )
-  const [resetTimer, setResetTimer] = useState<boolean>(false)
-  const [currentPlayer, setCurrentPlayer] = useState<Player>(currentPlayerInit)
-  const [selectedLetter, setSelectedLetter] = useState<string>('')
-  const [roundStarted, setRoundStarted] = useState<boolean>(false)
-  const [isInTextMode, setIsInTextMode] = useState<boolean>(false)
-  const [textModeWords, setTextModeWords] = useState<string[]>([])
-  const [roundWinner, setRoundWinner] = useState<Player | null>(null)
-  const [gameWinner, setGameWinner] = useState<Player | null>(null)
+    StringArrayToBooleanMap(Object.values(LettersEasy)),
+  );
+  const [resetTimer, setResetTimer] = useState<boolean>(false);
+  const [currentPlayer, setCurrentPlayer] = useState<Player>(currentPlayerInit);
+  const [selectedLetter, setSelectedLetter] = useState<string>("");
+  const [roundStarted, setRoundStarted] = useState<boolean>(false);
+  const [isInTextMode, setIsInTextMode] = useState<boolean>(false);
+  const [textModeWords, setTextModeWords] = useState<string[]>([]);
+  const [roundWinner, setRoundWinner] = useState<Player | null>(null);
+  const [gameWinner, setGameWinner] = useState<Player | null>(null);
   const [roomHasEnoughPlayers, setRoomHasEnoughPlayers] = useState<boolean>(
-    roomHasEnoughPlayersInit
-  )
-  const [category, setCategory] = useState<string>('')
-  const [textModeError, setTextModeError] = useState<string>('')
-  const sectionRef = useRef<HTMLElement>(null)
-  const inputRef = useRef<HTMLInputElement>(null)
+    roomHasEnoughPlayersInit,
+  );
+  const [category, setCategory] = useState<string>("");
+  const [textModeError, setTextModeError] = useState<string>("");
+  const sectionRef = useRef<HTMLElement>(null);
+  const inputRef = useRef<HTMLInputElement>(null);
 
-  const isThisCurrentPlayer = () => socket.id === currentPlayer.id
+  const isThisCurrentPlayer = () => socket.id === currentPlayer.id;
 
   const canSelectLetter = (letter: string) =>
-    isLetterSelectable(letter) || !isLetterUsed(letter)
+    isLetterSelectable(letter) || !isLetterUsed(letter);
 
   const isLetterSelectable = (letter: string) =>
-    letter in usedLetters && usedLetters[letter] === true
+    letter in usedLetters && usedLetters[letter] === true;
 
-  const isLetterUsed = (letter: string) => letter in usedLetters
+  const isLetterUsed = (letter: string) => letter in usedLetters;
 
-  const isLetterInLetterSet = (letter: string) => letter in letterSet
+  const isLetterInLetterSet = (letter: string) => letter in letterSet;
 
   const toggleSelectLetter = (letter: string) => {
     if (
@@ -68,220 +68,223 @@ export const Room: React.FC<Props> = ({
       !isThisCurrentPlayer() ||
       !isLetterInLetterSet(letter)
     ) {
-      return
+      return;
     }
-    let prevLetter = ''
+    let prevLetter = "";
     if (selectedLetter !== letter) {
-      prevLetter = selectedLetter
+      prevLetter = selectedLetter;
     }
-    setSelectedLetter((prev) => (prev === letter ? '' : letter))
+    setSelectedLetter((prev) => (prev === letter ? "" : letter));
     socket.emit(
       SocketEventType.SelectLetter,
-      JSON.stringify({ roomId, letter, prevLetter })
-    )
-  }
+      JSON.stringify({ roomId, letter, prevLetter }),
+    );
+  };
 
   const endTurn = () => {
     if (socket.id === currentPlayer.id) {
-      if (selectedLetter !== '' && canSelectLetter(selectedLetter)) {
-        let textModeWord = ''
+      if (selectedLetter !== "" && canSelectLetter(selectedLetter)) {
+        let textModeWord = "";
         if (isInTextMode) {
-          textModeWord = inputRef.current!.value
-          inputRef.current!.value = ''
-          setTextModeWords((prev) => [...prev, textModeWord])
+          textModeWord = inputRef.current!.value;
+          inputRef.current!.value = "";
+          setTextModeWords((prev) => [...prev, textModeWord]);
         }
         socket.emit(
           SocketEventType.EndTurn,
-          JSON.stringify({ roomId, selectedLetter, textModeWord })
-        )
-        setResetTimer(true)
-        setSelectedLetter('')
+          JSON.stringify({ roomId, selectedLetter, textModeWord }),
+        );
+        setResetTimer(true);
+        setSelectedLetter("");
       }
     }
-  }
+  };
 
   const handleTextMode = (e: React.ChangeEvent<HTMLInputElement>) => {
-    if (!roundStarted) return
-    const value = e.target.value
+    if (!roundStarted) return;
+    const value = e.target.value;
     if (Boolean(value)) {
-      const keyUpper = value!.charAt(0).toUpperCase()
+      const keyUpper = value!.charAt(0).toUpperCase();
       if (canSelectLetter(keyUpper)) {
-        if (selectedLetter === '') {
-          toggleSelectLetter(keyUpper)
+        if (selectedLetter === "") {
+          toggleSelectLetter(keyUpper);
         }
       } else {
-        setTextModeError(`The letter ʻ${keyUpper}ʻ has already been used`)
+        setTextModeError(`The letter ʻ${keyUpper}ʻ has already been used`);
       }
     } else {
-      if (selectedLetter !== '') {
-        toggleSelectLetter(value)
+      if (selectedLetter !== "") {
+        toggleSelectLetter(value);
       }
-      setTextModeError('')
+      setTextModeError("");
     }
-  }
+  };
 
   const handleKeyDown = (e: KeyboardEvent) => {
-    if (!roundStarted) return
-    var key = e.key
-    if (key === 'Enter') {
-      endTurn()
+    if (!roundStarted) return;
+    var key = e.key;
+    if (key === "Enter") {
+      endTurn();
     } else {
       if (!isInTextMode) {
-        const keyUpper = key.toUpperCase()
-        toggleSelectLetter(keyUpper)
+        const keyUpper = key.toUpperCase();
+        toggleSelectLetter(keyUpper);
       }
     }
-  }
+  };
 
   const handleLeaveRoom = (e: MouseEvent) => {
     socket.emit(
       SocketEventType.LeaveRoom,
-      JSON.stringify({ roomId, playerId: socket.id })
-    )
-  }
+      JSON.stringify({ roomId, playerId: socket.id }),
+    );
+  };
 
   const handleStartGame = () => {
-    setRoundStarted(true)
+    setRoundStarted(true);
     if (isInTextMode) {
       // if we're in text mode focus on the input
-      inputRef.current?.focus()
+      inputRef.current?.focus();
     }
-    socket.emit(SocketEventType.CountdownStarted, JSON.stringify({ roomId }))
-  }
+    socket.emit(SocketEventType.CountdownStarted, JSON.stringify({ roomId }));
+  };
 
   const handleSetIsTextMode = () => {
     socket.emit(
       SocketEventType.SetIsInTextMode,
-      JSON.stringify({ isInTextMode: !isInTextMode, roomId })
-    )
-  }
+      JSON.stringify({ isInTextMode: !isInTextMode, roomId }),
+    );
+  };
 
   const handlePlayAgain = () => {
-    socket.emit(SocketEventType.CountdownStarted, JSON.stringify({ roomId }))
-  }
+    socket.emit(SocketEventType.CountdownStarted, JSON.stringify({ roomId }));
+  };
 
   useEffect(() => {
     socket.on(SocketEventType.LetterSelected, (usedLetters) => {
-      setUsedLetters(usedLetters)
-    })
+      setUsedLetters(usedLetters);
+    });
     socket.on(
       SocketEventType.RoomJoined,
       ({ usedLetters, currentPlayer, playerCount }) => {
-        setUsedLetters(usedLetters)
-        setCurrentPlayer(currentPlayer)
-        setRoomHasEnoughPlayers(playerCount > 1)
-      }
-    )
+        setUsedLetters(usedLetters);
+        setCurrentPlayer(currentPlayer);
+        setRoomHasEnoughPlayers(playerCount > 1);
+      },
+    );
     socket.on(
       SocketEventType.StartTurn,
       ({ textModeWords, usedLetters, currentPlayer }) => {
-        setUsedLetters(usedLetters)
-        setCurrentPlayer(currentPlayer)
-        setTextModeWords(textModeWords)
-      }
-    )
+        setUsedLetters(usedLetters);
+        setCurrentPlayer(currentPlayer);
+        setTextModeWords(textModeWords);
+      },
+    );
     socket.on(
       SocketEventType.RoundStarted,
       ({ category, usedLetters, currentPlayer, textModeWords }) => {
-        setGameWinner(null)
-        setRoundWinner(null)
-        setCategory(category)
-        setRoundStarted(true)
-        setUsedLetters(usedLetters)
-        setCurrentPlayer(currentPlayer)
-        setTextModeWords(textModeWords)
-      }
-    )
+        setGameWinner(null);
+        setRoundWinner(null);
+        setCategory(category);
+        setRoundStarted(true);
+        setUsedLetters(usedLetters);
+        setCurrentPlayer(currentPlayer);
+        setTextModeWords(textModeWords);
+      },
+    );
     socket.on(SocketEventType.SetIsInTextMode, ({ isInTextMode }) => {
-      setIsInTextMode(isInTextMode)
-    })
+      setIsInTextMode(isInTextMode);
+    });
     socket.on(SocketEventType.RoundEnded, ({ winningPlayer }) => {
-      setRoundStarted(false)
-      setRoundWinner(winningPlayer)
-    })
+      setRoundStarted(false);
+      setRoundWinner(winningPlayer);
+    });
     socket.on(
       SocketEventType.GameEnded,
       ({ gameWinner, usedLetters, currentPlayer, playerCount }) => {
-        setGameWinner(gameWinner)
-        setRoundWinner(null)
-        setUsedLetters(usedLetters)
-        setCurrentPlayer(currentPlayer)
-        setRoomHasEnoughPlayers(playerCount > 1)
-      }
-    )
+        setGameWinner(gameWinner);
+        setRoundWinner(null);
+        setUsedLetters(usedLetters);
+        setCurrentPlayer(currentPlayer);
+        setRoomHasEnoughPlayers(playerCount > 1);
+      },
+    );
     return () => {
-      socket.off(SocketEventType.LetterSelected)
-      socket.off(SocketEventType.RoomJoined)
-    }
-  }, [socket])
+      socket.off(SocketEventType.LetterSelected);
+      socket.off(SocketEventType.RoomJoined);
+    };
+  }, [socket]);
 
-  useEffect(() => setResetTimer(false), [resetTimer])
+  useEffect(() => setResetTimer(false), [resetTimer]);
 
-  useEffect(() => sectionRef.current?.focus(), [sectionRef])
+  useEffect(() => sectionRef.current?.focus(), [sectionRef]);
 
   useEffect(() => {
     if (hardMode) {
-      setLetterSet(StringArrayToBooleanMap(Object.values(LettersHard)))
+      setLetterSet(StringArrayToBooleanMap(Object.values(LettersHard)));
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [hardMode])
+  }, [hardMode]);
 
   useEffect(() => {
-    setShowNavBar(true)
+    setShowNavBar(true);
     setNavItems(
       <a
-        className='navbar-item'
+        className="navbar-item"
         href={Routes.HowToPlay}
-        onClick={handleLeaveRoom}>
+        onClick={handleLeaveRoom}
+      >
         Leave Room
-      </a>
-    )
+      </a>,
+    );
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [setShowNavBar, setNavItems])
+  }, [setShowNavBar, setNavItems]);
 
-  useEffect(() => setCurrentPlayer(currentPlayerInit), [currentPlayerInit])
+  useEffect(() => setCurrentPlayer(currentPlayerInit), [currentPlayerInit]);
   useEffect(
     () => setRoomHasEnoughPlayers(roomHasEnoughPlayersInit),
-    [roomHasEnoughPlayersInit]
-  )
+    [roomHasEnoughPlayersInit],
+  );
 
   return (
     <section
-      className='section room'
+      className="section room"
       ref={sectionRef}
       tabIndex={0}
-      onKeyDown={handleKeyDown}>
+      onKeyDown={handleKeyDown}
+    >
       {gameWinner ? (
-        <div className='container'>
-          <p className='title is-2 has-text-centered'>
+        <div className="container">
+          <p className="title is-2 has-text-centered">
             {gameWinner.name} won the game!
           </p>
-          <div className='buttons is-centered'>
-            <button className='button is-primary' onClick={handlePlayAgain}>
+          <div className="buttons is-centered">
+            <button className="button is-primary" onClick={handlePlayAgain}>
               Play again
             </button>
           </div>
         </div>
       ) : (
-        <div className='container'>
-          <h1 className='title has-text-centered'>Game room: {roomId}</h1>
+        <div className="container">
+          <h1 className="title has-text-centered">Game room: {roomId}</h1>
           {roundWinner ? (
             <>
-              <div className='container is-centered'>
-                <p className='title is-2 has-text-centered'>
+              <div className="container is-centered">
+                <p className="title is-2 has-text-centered">
                   {roundWinner.name} won the round!
                 </p>
-                <div className='buttons is-centered'>
+                <div className="buttons is-centered">
                   <button
-                    className='button is-primary'
+                    className="button is-primary"
                     onClick={() => {
-                      handleStartGame()
+                      handleStartGame();
                       // Reset focus on the section for keydown listener
                       const roomSection = document
-                        .getElementsByClassName('room')
-                        .item(0) as HTMLElement
-                      roomSection.focus()
-                    }}>
+                        .getElementsByClassName("room")
+                        .item(0) as HTMLElement;
+                      roomSection.focus();
+                    }}
+                  >
                     Start next round
                   </button>
                 </div>
@@ -290,29 +293,31 @@ export const Room: React.FC<Props> = ({
           ) : (
             <>
               {!roundStarted ? (
-                <div className='container block'>
-                  <div className='buttons is-centered'>
+                <div className="container block">
+                  <div className="buttons is-centered">
                     <button
-                      className='button is-primary'
+                      className="button is-primary"
                       disabled={!roomHasEnoughPlayers}
                       onClick={() => {
-                        handleStartGame()
+                        handleStartGame();
                         // Reset focus on the section for keydown listener
                         const roomSection = document
-                          .getElementsByClassName('room')
-                          .item(0) as HTMLElement
-                        roomSection.focus()
-                      }}>
+                          .getElementsByClassName("room")
+                          .item(0) as HTMLElement;
+                        roomSection.focus();
+                      }}
+                    >
                       {!roomHasEnoughPlayers
-                        ? 'Waiting for more players to join...'
-                        : 'Start round'}
+                        ? "Waiting for more players to join..."
+                        : "Start round"}
                     </button>
                   </div>
-                  <div className='buttons is-centered'>
+                  <div className="buttons is-centered">
                     <button
-                      className='button is-primary'
-                      onClick={handleSetIsTextMode}>
-                      {!isInTextMode ? 'Enable' : 'Disable'} text mode
+                      className="button is-primary"
+                      onClick={handleSetIsTextMode}
+                    >
+                      {!isInTextMode ? "Enable" : "Disable"} text mode
                     </button>
                   </div>
                 </div>
@@ -324,30 +329,30 @@ export const Room: React.FC<Props> = ({
                 />
               )}
               {isInTextMode ? (
-                <div className='buttons is-centered'>
-                  <div className='control'>
+                <div className="buttons is-centered">
+                  <div className="control">
                     <input
-                      id='text-mode-input'
-                      name='text-mode-input'
-                      placeholder='Enter your answer'
+                      id="text-mode-input"
+                      name="text-mode-input"
+                      placeholder="Enter your answer"
                       onInput={handleTextMode}
                       disabled={!roundStarted}
-                      className={classNames('input', {
-                        'is-primary': !Boolean(textModeError),
-                        'is-danger': Boolean(textModeError),
+                      className={classNames("input", {
+                        "is-primary": !Boolean(textModeError),
+                        "is-danger": Boolean(textModeError),
                       })}
-                      type='text'
+                      type="text"
                       ref={inputRef}
                     />
                     {Boolean(textModeError) ? (
-                      <p className='help is-danger'>{textModeError}</p>
+                      <p className="help is-danger">{textModeError}</p>
                     ) : null}
                   </div>
                 </div>
               ) : (
                 roundStarted && (
-                  <div className='buttons is-centered'>
-                    <button className='button is-primary' onClick={endTurn}>
+                  <div className="buttons is-centered">
+                    <button className="button is-primary" onClick={endTurn}>
                       End Turn
                     </button>
                   </div>
@@ -356,7 +361,7 @@ export const Room: React.FC<Props> = ({
             </>
           )}
 
-          <div className='container letters-container has-text-centered mb-4'>
+          <div className="container letters-container has-text-centered mb-4">
             {Object.keys(letterSet).map((letter) => (
               <Letter
                 key={letter}
@@ -364,30 +369,30 @@ export const Room: React.FC<Props> = ({
                 used={letter in usedLetters}
                 toggleSelectLetter={(letter: string) => {
                   if (!isInTextMode && roundStarted) {
-                    toggleSelectLetter(letter)
+                    toggleSelectLetter(letter);
                   }
                 }}
               />
             ))}
           </div>
-          <div className='container has-text-centered'>
-            <div className='block'>
-              <div className='turn-container subtitle is-4'>Category</div>
-              <div className='topic-container title is-2'>
-                {category ? category : '-'}
+          <div className="container has-text-centered">
+            <div className="block">
+              <div className="turn-container subtitle is-4">Category</div>
+              <div className="topic-container title is-2">
+                {category ? category : "-"}
               </div>
             </div>
-            <div className='block'>
-              <div className='turn-container subtitle is-4'>Turn</div>
-              <div className='topic-container title is-2'>
-                {isThisCurrentPlayer() ? 'Your' : `${currentPlayer.name}'s`}{' '}
+            <div className="block">
+              <div className="turn-container subtitle is-4">Turn</div>
+              <div className="topic-container title is-2">
+                {isThisCurrentPlayer() ? "Your" : `${currentPlayer.name}'s`}{" "}
                 turn
               </div>
             </div>
-            {/* TODO: imrove the UI for displaying the text mode answers */}
+            {/* TODO: improve the UI for displaying the text mode answers */}
             {isInTextMode ? (
-              <div className='block content'>
-                <p className='title is-3'>Answers</p>
+              <div className="block content">
+                <p className="title is-3">Answers</p>
                 <ul>
                   {textModeWords.map((word) => (
                     <li key={word}>{word}</li>
@@ -399,5 +404,5 @@ export const Room: React.FC<Props> = ({
         </div>
       )}
     </section>
-  )
-}
+  );
+};

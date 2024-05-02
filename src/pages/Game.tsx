@@ -1,120 +1,117 @@
-import React, { useEffect, useRef, useState } from 'react'
-import './Game.css'
+import React, { useEffect, useRef, useState } from "react";
+import "./Game.css";
 import {
   useWebSocketContext,
   WebSocketContextProvider,
-} from '../components/WebsocketContext'
-import { Room } from './Room'
-import { useRoomContext } from '../components/RoomContext'
-import { Player, Routes } from '../types'
-import { InputField } from '../components/InputField'
-import { useNavigationContext } from '../components/NavigationContext'
-import { SocketEventType } from '../constants'
+} from "../components/WebsocketContext";
+import { Room } from "./Room";
+import { useRoomContext } from "../components/RoomContext";
+import { Player, Routes } from "../types";
+import { InputField } from "../components/InputField";
+import { useNavigationContext } from "../components/NavigationContext";
+import { SocketEventType } from "../constants";
+import { Button } from "../components/Button";
+import { useParams } from "react-router-dom";
 
 interface Props {
-  hardMode?: boolean
+  hardMode?: boolean;
 }
 
 export const GameContainer: React.FC<{}> = () => {
-  const { setShowNavBar, setNavItems } = useNavigationContext()
+  const { setShowNavBar, setNavItems } = useNavigationContext();
   useEffect(() => {
-    setShowNavBar(true)
+    setShowNavBar(true);
     setNavItems(
-      <a className='navbar-item' href={Routes.HowToPlay}>
+      <a className="navbar-item" href={Routes.HowToPlay}>
         How To Play
-      </a>
-    )
-  }, [setNavItems, setShowNavBar])
+      </a>,
+    );
+  }, [setNavItems, setShowNavBar]);
 
   return (
     <WebSocketContextProvider>
       <Setup />
     </WebSocketContextProvider>
-  )
-}
+  );
+};
 
 export const Setup: React.FC<Props> = ({ hardMode }) => {
-  const { socket } = useWebSocketContext()
-  const createRoomInput = useRef<HTMLInputElement>(null)
-  const joinRoomInput = useRef<HTMLInputElement>(null)
-  const setPlayerNameInput = useRef<HTMLInputElement>(null)
-  const { roomId, playerName, createRoom, joinRoom, setPlayerName } =
-    useRoomContext()
+  const { socket } = useWebSocketContext();
+  const createRoomInput = useRef<HTMLInputElement>(null);
+  const joinRoomInput = useRef<HTMLInputElement>(null);
+  const setPlayerNameInput = useRef<HTMLInputElement>(null);
+  const { playerName, createRoom, joinRoom, setPlayerName } = useRoomContext();
+  const { roomId } = useParams();
   const [roomCurrentPlayer, setRoomCurrentPlayer] = useState<Player>({
     id: socket.id,
-    name: 'Player',
+    name: "Player",
     isTurn: false,
-  })
+  });
   const [roomHasEnoughPlayers, setRoomHasEnoughPlayers] =
-    useState<boolean>(false)
+    useState<boolean>(false);
 
   useEffect(() => {
     if (socket) {
       if (!roomId) {
-        createRoomInput.current?.focus()
+        createRoomInput.current?.focus();
       } else if (!playerName) {
-        setPlayerNameInput.current?.focus()
+        setPlayerNameInput.current?.focus();
       }
     }
-  }, [socket, roomId, playerName])
+  }, [socket, roomId, playerName]);
 
   useEffect(() => {
     socket.on(SocketEventType.RoomJoined, ({ currentPlayer, playerCount }) => {
-      setRoomCurrentPlayer(currentPlayer)
-      setRoomHasEnoughPlayers(playerCount > 1)
-    })
-  }, [socket])
+      setRoomCurrentPlayer(currentPlayer);
+      setRoomHasEnoughPlayers(playerCount > 1);
+    });
+  }, [socket]);
 
   if (!roomId) {
     return (
       <>
-        <InputField
-          inputProps={{
-            id: 'room-name',
-            name: 'room-name',
-            placeholder: 'Enter a room name',
-          }}
-          inputRef={createRoomInput}
-          buttonLabel='Create a new game room'
+        <Button
+          label="Create new room"
           onClick={() => {
-            var input = document.querySelector('#room-name') as HTMLInputElement
-            createRoom(input.value)
+            createRoom();
           }}
         />
         <InputField
           inputProps={{
-            id: 'room-id',
-            name: 'room-id',
-            placeholder: 'Enter a game room Id',
+            id: "room-id",
+            name: "room-id",
+            placeholder: "Enter a game room Id",
           }}
           inputRef={joinRoomInput}
-          buttonLabel='Join an existing room'
+          buttonLabel="Join an existing room"
           onClick={() => {
-            var input = document.querySelector('#room-id') as HTMLInputElement
-            joinRoom(input.value)
+            var input = document.querySelector("#room-id") as HTMLInputElement;
+            joinRoom(input.value);
           }}
         />
       </>
-    )
+    );
   }
 
   if (!playerName) {
     return (
       <InputField
         inputProps={{
-          id: 'player-name',
-          name: 'player-name',
-          placeholder: 'Enter your player name',
-          defaultValue: '',
+          id: "player-name",
+          name: "player-name",
+          placeholder: "Enter your player name",
+          defaultValue: "",
         }}
         inputRef={setPlayerNameInput}
-        buttonLabel='Set Player Name'
+        buttonLabel="Set Player Name"
         onClick={() => {
-          var input = document.querySelector('#player-name') as HTMLInputElement
-          setPlayerName(roomId, socket.id, input.value)
+          var input = document.querySelector(
+            "#player-name",
+          ) as HTMLInputElement;
+          setPlayerName(roomId, socket.id, input.value);
         }}
       />
-    )
+    );
   }
 
   return (
@@ -124,5 +121,5 @@ export const Setup: React.FC<Props> = ({ hardMode }) => {
       currentPlayer={roomCurrentPlayer}
       roomHasEnoughPlayers={roomHasEnoughPlayers}
     />
-  )
-}
+  );
+};
