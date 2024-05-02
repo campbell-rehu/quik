@@ -1,8 +1,10 @@
 FROM nginx:stable-alpine
 RUN apk update && apk add --no-cache bash jq
 
+WORKDIR ./
 RUN npm ci
 RUN SERVER=$QUIK_SERVER_URL BUILD_PATH=./fe-build npm run build
+
 # copy built front-end artifacts
 COPY ./fe-build /usr/share/nginx/html
 # copy custom nginx.conf to handle react router
