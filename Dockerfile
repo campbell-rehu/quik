@@ -1,7 +1,7 @@
 FROM nginx:stable-alpine
 RUN apk update && apk add --no-cache bash jq
 
-WORKDIR ./
+COPY ./ /
 RUN npm ci
 RUN SERVER=$QUIK_SERVER_URL BUILD_PATH=./fe-build npm run build
 
