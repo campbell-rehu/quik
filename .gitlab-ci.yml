@@ -7,29 +7,29 @@ stages:
 
 # Test steps
 test-fe:
-  image: node:13.12.0-alpine
+  image: node:16.17.1-alpine3.15
   stage: front-end
   rules:
     - changes:
-      - 'src/**/*'
+        - "src/**/*"
   script:
     - npm install
     - CI=true npm test
 
 # Build steps
 build-fe:
-  image: node:13.12.0-alpine
+  image: node:16.17.1-alpine3.15
   stage: front-end
   environment: production
   rules:
     - changes:
-      - 'src/**/*'
+        - "src/**/*"
   script:
     - npm install
     - SERVER=$QUIK_SERVER_URL BUILD_PATH=./fe-build npm run build
   artifacts:
     paths:
-      - 'fe-build/'
+      - "fe-build/"
     expire_in: 3 days
 
 build-be:
@@ -38,14 +38,14 @@ build-be:
   environment: production
   rules:
     - changes:
-      - 'server/**/*'
+        - "server/**/*"
   script:
     - cd server/
     - npm install
     - NODE_ENV=production npm run build
   artifacts:
     paths:
-      - 'server/dist/'
+      - "server/dist/"
     expire_in: 3 days
 
 # Docker image build and release for branch steps
@@ -53,12 +53,12 @@ build-be:
 docker_front_end_image_build_branch:
   image:
     name: gcr.io/kaniko-project/executor:debug
-    entrypoint: ['']
+    entrypoint: [""]
   stage: front-end
   rules:
     - if: $CI_COMMIT_BRANCH != "main"
       changes:
-        - 'src/**/*'
+        - "src/**/*"
       when: always
   environment: production
   script:
@@ -69,12 +69,12 @@ docker_front_end_image_build_branch:
 docker_back_end_image_build_branch:
   image:
     name: gcr.io/kaniko-project/executor:debug
-    entrypoint: ['']
+    entrypoint: [""]
   stage: back-end
   rules:
     - if: $CI_COMMIT_BRANCH != "main"
       changes:
-        - 'server/**/*'
+        - "server/**/*"
       when: always
   environment: production
   script:
@@ -82,16 +82,16 @@ docker_back_end_image_build_branch:
     - echo "{\"auths\":{\"$CI_REGISTRY\":{\"username\":\"$CI_REGISTRY_USER\",\"password\":\"$CI_REGISTRY_PASSWORD\"}}}" > /kaniko/.docker/config.json
     - /kaniko/executor --context $CI_PROJECT_DIR/server --dockerfile $CI_PROJECT_DIR/server/Dockerfile --destination $CI_REGISTRY_IMAGE/quik-be:$CI_COMMIT_BRANCH
 
-# Docker iamge build and release for main branch steps
+# Docker image build and release for main branch steps
 docker_front_end_image_build_release:
   image:
     name: gcr.io/kaniko-project/executor:debug
-    entrypoint: ['']
+    entrypoint: [""]
   stage: docker-release-front-end
   rules:
     - if: $CI_COMMIT_BRANCH == "main"
       changes:
-        - 'src/**/*'
+        - "src/**/*"
       when: always
   environment: production
   script:
@@ -102,12 +102,12 @@ docker_front_end_image_build_release:
 docker_back_end_image_build_release:
   image:
     name: gcr.io/kaniko-project/executor:debug
-    entrypoint: ['']
+    entrypoint: [""]
   stage: docker-release-back-end
   rules:
     - if: $CI_COMMIT_BRANCH == "main"
       changes:
-        - 'server/**/*'
+        - "server/**/*"
       when: always
   environment: production
   script:
