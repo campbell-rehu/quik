@@ -14,7 +14,7 @@ let io = new Server(http, {
   },
 });
 
-const port = 5001;
+const port = 5000;
 
 app.use(cors({ origin: "*" }));
 app.use(express.json());
