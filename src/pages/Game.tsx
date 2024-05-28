@@ -93,7 +93,6 @@ export const Setup: React.FC<Props> = ({ hardMode }) => {
     );
   }
 
-
   if (!playerName) {
     return (
       <InputField

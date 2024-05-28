@@ -1,9 +1,4 @@
-import React, {
-  KeyboardEvent,
-  useEffect,
-  useRef,
-  useState,
-} from "react";
+import React, { KeyboardEvent, useEffect, useRef, useState } from "react";
 import { Socket } from "socket.io-client";
 import { LettersEasy, SocketEventType, LettersHard } from "../constants";
 import { StringArrayToBooleanMap } from "../helpers";
@@ -11,6 +6,7 @@ import { Letter } from "../components/Letter";
 import { Timer } from "../components/Timer";
 import { BooleanMap, Player, Routes } from "../types";
 import { useNavigationContext } from "../components/NavigationContext";
+import classNames from "classnames";
 
 interface Props {
   roomId: string;
@@ -42,9 +38,12 @@ export const Room: React.FC<Props> = ({
     roomHasEnoughPlayersInit,
   );
   const [category, setCategory] = useState<string>("");
+  const [players, setPlayers] = useState<{ [playerId: string]: string }>({});
   const sectionRef = useRef<HTMLElement>(null);
 
   const isThisCurrentPlayer = () => socket.id === currentPlayer.id;
+
+  const isPlayersTurn = (id: string) => id === currentPlayer.id;
 
   const canSelectLetter = (letter: string) =>
     isLetterSelectable(letter) || !isLetterUsed(letter);
@@ -118,19 +117,17 @@ export const Room: React.FC<Props> = ({
     });
     socket.on(
       SocketEventType.RoomJoined,
-      ({ usedLetters, currentPlayer, playerCount }) => {
+      ({ players, usedLetters, currentPlayer, playerCount }) => {
         setUsedLetters(usedLetters);
         setCurrentPlayer(currentPlayer);
         setRoomHasEnoughPlayers(playerCount > 1);
+        setPlayers(players);
       },
     );
-    socket.on(
-      SocketEventType.StartTurn,
-      ({ usedLetters, currentPlayer }) => {
-        setUsedLetters(usedLetters);
-        setCurrentPlayer(currentPlayer);
-      },
-    );
+    socket.on(SocketEventType.StartTurn, ({ usedLetters, currentPlayer }) => {
+      setUsedLetters(usedLetters);
+      setCurrentPlayer(currentPlayer);
+    });
     socket.on(
       SocketEventType.RoundStarted,
       ({ category, usedLetters, currentPlayer }) => {
@@ -273,37 +270,44 @@ export const Room: React.FC<Props> = ({
                     End Turn
                   </button>
                 </div>
-              )
-              }
+              )}
             </>
           )}
 
-          <div className="container letters-container has-text-centered mb-4">
-            {Object.keys(letterSet).map((letter) => (
-              <Letter
-                key={letter}
-                label={letter}
-                used={letter in usedLetters}
-                toggleSelectLetter={(letter: string) => {
-                  if (roundStarted) {
-                    toggleSelectLetter(letter);
-                  }
-                }}
-              />
-            ))}
+          <div className="is-flex">
+            <div>
+              <div className="has-text-weight-bold">Players</div>
+              {Object.keys(players).map((playerId) => (
+                <div
+                  key={playerId}
+                  className={classNames({
+                    "has-text-primary": isPlayersTurn(playerId),
+                  })}
+                >
+                  {players[playerId]}
+                </div>
+              ))}
+            </div>
+            <div className="container letters-container has-text-centered mb-4">
+              {Object.keys(letterSet).map((letter) => (
+                <Letter
+                  key={letter}
+                  label={letter}
+                  used={letter in usedLetters}
+                  toggleSelectLetter={(letter: string) => {
+                    if (roundStarted) {
+                      toggleSelectLetter(letter);
+                    }
+                  }}
+                />
+              ))}
+            </div>
           </div>
           <div className="container has-text-centered">
             <div className="block">
               <div className="turn-container subtitle is-4">Category</div>
               <div className="topic-container title is-2">
                 {category ? category : "-"}
-              </div>
-            </div>
-            <div className="block">
-              <div className="turn-container subtitle is-4">Turn</div>
-              <div className="topic-container title is-2">
-                {isThisCurrentPlayer() ? "Your" : `${currentPlayer.name}'s`}{" "}
-                turn
               </div>
             </div>
           </div>

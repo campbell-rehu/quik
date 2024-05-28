@@ -76,12 +76,19 @@ func (s *Socket) OnJoinRoom(client *socket.Socket) func(data ...any) {
 		client.Join(socket.Room(roomId))
 
 		type x struct {
-			UsedLetters   map[string]bool `json:"usedLetters"`
-			CurrentPlayer *types.Player   `json:"currentPlayer"`
-			PlayerCount   int             `json:"playerCount"`
+			Players       map[string]string `json:"players"`
+			UsedLetters   map[string]bool   `json:"usedLetters"`
+			CurrentPlayer *types.Player     `json:"currentPlayer"`
+			PlayerCount   int               `json:"playerCount"`
+		}
+
+		playerNamesById := make(map[string]string)
+		for id, p := range room.Players {
+			playerNamesById[id] = p.Name
 		}
 
 		s.emitToRoom(client, roomId, types.EventTypeRoomJoined, &x{
+			Players:       playerNamesById,
 			UsedLetters:   room.UsedLetters,
 			CurrentPlayer: room.CurrentPlayer,
 			PlayerCount:   room.GetPlayerCount(),
