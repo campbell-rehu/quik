@@ -1,4 +1,7 @@
-node_modules
 .dockerignore
 Dockerfile
 Dockerfile.prod
+docker-compose.prod.yml
+docker-compose.yml
+*.ts
+./dist

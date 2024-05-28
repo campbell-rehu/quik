@@ -1,16 +1,15 @@
-FROM node:16.17.1-alpine3.15
+FROM golang:alpine3.19
 
 # Create app directory
-WORKDIR /usr/src/app
+WORKDIR /app
 
-# Install app dependencies
-# A wildcard is used to ensure both package.json AND package-lock.json are copied
-COPY package*.json ./
+COPY go.mod go.sum ./
+RUN go mod download
 
-RUN npm ci
+COPY . ./
 
-# Bundle app source
-COPY ./dist .
+RUN CGO_ENABLED=0 GOOS=linux go build -o /quik
 
 EXPOSE 5000
-CMD [ "node", "server.js" ]
+
+CMD [ "/quik" ]
