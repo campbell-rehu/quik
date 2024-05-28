@@ -1,6 +1,5 @@
 import React, {
   KeyboardEvent,
-  MouseEvent,
   useEffect,
   useRef,
   useState,
@@ -12,7 +11,6 @@ import { Letter } from "../components/Letter";
 import { Timer } from "../components/Timer";
 import { BooleanMap, Player, Routes } from "../types";
 import { useNavigationContext } from "../components/NavigationContext";
-import classNames from "classnames";
 
 interface Props {
   roomId: string;
@@ -38,17 +36,13 @@ export const Room: React.FC<Props> = ({
   const [currentPlayer, setCurrentPlayer] = useState<Player>(currentPlayerInit);
   const [selectedLetter, setSelectedLetter] = useState<string>("");
   const [roundStarted, setRoundStarted] = useState<boolean>(false);
-  const [isInTextMode, setIsInTextMode] = useState<boolean>(false);
-  const [textModeWords, setTextModeWords] = useState<string[]>([]);
   const [roundWinner, setRoundWinner] = useState<Player | null>(null);
   const [gameWinner, setGameWinner] = useState<Player | null>(null);
   const [roomHasEnoughPlayers, setRoomHasEnoughPlayers] = useState<boolean>(
     roomHasEnoughPlayersInit,
   );
   const [category, setCategory] = useState<string>("");
-  const [textModeError, setTextModeError] = useState<string>("");
   const sectionRef = useRef<HTMLElement>(null);
-  const inputRef = useRef<HTMLInputElement>(null);
 
   const isThisCurrentPlayer = () => socket.id === currentPlayer.id;
 
@@ -84,39 +78,13 @@ export const Room: React.FC<Props> = ({
   const endTurn = () => {
     if (socket.id === currentPlayer.id) {
       if (selectedLetter !== "" && canSelectLetter(selectedLetter)) {
-        let textModeWord = "";
-        if (isInTextMode) {
-          textModeWord = inputRef.current!.value;
-          inputRef.current!.value = "";
-          setTextModeWords((prev) => [...prev, textModeWord]);
-        }
         socket.emit(
           SocketEventType.EndTurn,
-          JSON.stringify({ roomId, selectedLetter, textModeWord }),
+          JSON.stringify({ roomId, selectedLetter }),
         );
         setResetTimer(true);
         setSelectedLetter("");
       }
-    }
-  };
-
-  const handleTextMode = (e: React.ChangeEvent<HTMLInputElement>) => {
-    if (!roundStarted) return;
-    const value = e.target.value;
-    if (Boolean(value)) {
-      const keyUpper = value!.charAt(0).toUpperCase();
-      if (canSelectLetter(keyUpper)) {
-        if (selectedLetter === "") {
-          toggleSelectLetter(keyUpper);
-        }
-      } else {
-        setTextModeError(`The letter ʻ${keyUpper}ʻ has already been used`);
-      }
-    } else {
-      if (selectedLetter !== "") {
-        toggleSelectLetter(value);
-      }
-      setTextModeError("");
     }
   };
 
@@ -125,15 +93,10 @@ export const Room: React.FC<Props> = ({
     var key = e.key;
     if (key === "Enter") {
       endTurn();
-    } else {
-      if (!isInTextMode) {
-        const keyUpper = key.toUpperCase();
-        toggleSelectLetter(keyUpper);
-      }
     }
   };
 
-  const handleLeaveRoom = (e: MouseEvent) => {
+  const handleLeaveRoom = () => {
     socket.emit(
       SocketEventType.LeaveRoom,
       JSON.stringify({ roomId, playerId: socket.id }),
@@ -142,18 +105,7 @@ export const Room: React.FC<Props> = ({
 
   const handleStartGame = () => {
     setRoundStarted(true);
-    if (isInTextMode) {
-      // if we're in text mode focus on the input
-      inputRef.current?.focus();
-    }
     socket.emit(SocketEventType.CountdownStarted, JSON.stringify({ roomId }));
-  };
-
-  const handleSetIsTextMode = () => {
-    socket.emit(
-      SocketEventType.SetIsInTextMode,
-      JSON.stringify({ isInTextMode: !isInTextMode, roomId }),
-    );
   };
 
   const handlePlayAgain = () => {
@@ -174,27 +126,22 @@ export const Room: React.FC<Props> = ({
     );
     socket.on(
       SocketEventType.StartTurn,
-      ({ textModeWords, usedLetters, currentPlayer }) => {
+      ({ usedLetters, currentPlayer }) => {
         setUsedLetters(usedLetters);
         setCurrentPlayer(currentPlayer);
-        setTextModeWords(textModeWords);
       },
     );
     socket.on(
       SocketEventType.RoundStarted,
-      ({ category, usedLetters, currentPlayer, textModeWords }) => {
+      ({ category, usedLetters, currentPlayer }) => {
         setGameWinner(null);
         setRoundWinner(null);
         setCategory(category);
         setRoundStarted(true);
         setUsedLetters(usedLetters);
         setCurrentPlayer(currentPlayer);
-        setTextModeWords(textModeWords);
       },
     );
-    socket.on(SocketEventType.SetIsInTextMode, ({ isInTextMode }) => {
-      setIsInTextMode(isInTextMode);
-    });
     socket.on(SocketEventType.RoundEnded, ({ winningPlayer }) => {
       setRoundStarted(false);
       setRoundWinner(winningPlayer);
@@ -312,14 +259,6 @@ export const Room: React.FC<Props> = ({
                         : "Start round"}
                     </button>
                   </div>
-                  <div className="buttons is-centered">
-                    <button
-                      className="button is-primary"
-                      onClick={handleSetIsTextMode}
-                    >
-                      {!isInTextMode ? "Enable" : "Disable"} text mode
-                    </button>
-                  </div>
                 </div>
               ) : (
                 <Timer
@@ -328,36 +267,14 @@ export const Room: React.FC<Props> = ({
                   isCurrentPlayer={isThisCurrentPlayer()}
                 />
               )}
-              {isInTextMode ? (
+              {roundStarted && (
                 <div className="buttons is-centered">
-                  <div className="control">
-                    <input
-                      id="text-mode-input"
-                      name="text-mode-input"
-                      placeholder="Enter your answer"
-                      onInput={handleTextMode}
-                      disabled={!roundStarted}
-                      className={classNames("input", {
-                        "is-primary": !Boolean(textModeError),
-                        "is-danger": Boolean(textModeError),
-                      })}
-                      type="text"
-                      ref={inputRef}
-                    />
-                    {Boolean(textModeError) ? (
-                      <p className="help is-danger">{textModeError}</p>
-                    ) : null}
-                  </div>
+                  <button className="button is-primary" onClick={endTurn}>
+                    End Turn
+                  </button>
                 </div>
-              ) : (
-                roundStarted && (
-                  <div className="buttons is-centered">
-                    <button className="button is-primary" onClick={endTurn}>
-                      End Turn
-                    </button>
-                  </div>
-                )
-              )}
+              )
+              }
             </>
           )}
 
@@ -368,7 +285,7 @@ export const Room: React.FC<Props> = ({
                 label={letter}
                 used={letter in usedLetters}
                 toggleSelectLetter={(letter: string) => {
-                  if (!isInTextMode && roundStarted) {
+                  if (roundStarted) {
                     toggleSelectLetter(letter);
                   }
                 }}
@@ -389,17 +306,6 @@ export const Room: React.FC<Props> = ({
                 turn
               </div>
             </div>
-            {/* TODO: improve the UI for displaying the text mode answers */}
-            {isInTextMode ? (
-              <div className="block content">
-                <p className="title is-3">Answers</p>
-                <ul>
-                  {textModeWords.map((word) => (
-                    <li key={word}>{word}</li>
-                  ))}
-                </ul>
-              </div>
-            ) : null}
           </div>
         </div>
       )}

@@ -5,7 +5,6 @@ import { SERVER_URL } from "../config";
 import { SocketEventType } from "../constants";
 
 type Value = {
-  roomId: string;
   createRoom: () => void;
   joinRoom: (roomId: string) => void;
   playerName: string;
@@ -13,7 +12,6 @@ type Value = {
 };
 
 const defaultValue: Value = {
-  roomId: "",
   createRoom: () => {},
   joinRoom: () => {},
   playerName: "",
@@ -32,9 +30,13 @@ export const RoomContextProvider: React.FC<Props & PropsWithChildren> = ({
   socket,
   children,
 }) => {
-  const [roomId, setRoomId] = useState<string>("");
   const [playerName, setPlayerNameLocal] = useState<string>("");
   const navigate = useNavigate();
+
+  const parseResponse = async (response: Response) => {
+    const json = await response.json();
+    return JSON.parse(json);
+  };
 
   const createRoom = async () => {
     const response = await fetch(`${SERVER_URL}/room`, {
@@ -43,17 +45,18 @@ export const RoomContextProvider: React.FC<Props & PropsWithChildren> = ({
         "Content-Type": "application/json",
       },
     });
-    const json = await response.json();
-    navigate(`/game/${json.id}`);
-    // setRoomId(json.id);
+
+    const room = await parseResponse(response);
+
+    navigate(`/game/${room.id}`);
   };
 
   const joinRoom = async (roomId: string) => {
     const response = await fetch(`${SERVER_URL}/room/${roomId}`, {
       method: "GET",
     });
-    const json = await response.json();
-    setRoomId(json.id);
+    const room = await parseResponse(response);
+    navigate(`/game/${room.id}`);
   };
 
   const setPlayerName = async (
@@ -61,20 +64,19 @@ export const RoomContextProvider: React.FC<Props & PropsWithChildren> = ({
     playerId: string,
     playerName: string,
   ) => {
-    const response = await fetch(`${SERVER_URL}/player/${playerId}/name`, {
+    const response = await fetch(`${SERVER_URL}/room/${roomId}/addPlayer`, {
       method: "POST",
-      body: JSON.stringify({ roomId, playerName }),
+      body: JSON.stringify({ playerId, playerName }),
       headers: {
         "Content-Type": "application/json",
       },
     });
-    const json = await response.json();
-    setPlayerNameLocal(json.playerName);
+    const player = await parseResponse(response);
+    setPlayerNameLocal(player.playerName);
     socket.emit(SocketEventType.JoinRoom, roomId);
   };
 
   const value: Value = {
-    roomId,
     createRoom,
     joinRoom,
     playerName,

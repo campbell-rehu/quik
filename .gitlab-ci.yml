@@ -17,23 +17,23 @@ test-fe:
     - CI=true npm test
 
 # Build steps
-build-fe:
-  image: node:16.17.1-alpine3.15
-  stage: front-end
-  environment: production
-  rules:
-    - changes:
-        - "src/**/*"
-  script:
-    - npm install
-    - SERVER=$QUIK_SERVER_URL BUILD_PATH=./fe-build npm run build
-  artifacts:
-    paths:
-      - "fe-build/"
-    expire_in: 3 days
-
+# build-fe:
+#   image: node:16.17.1-alpine3.15
+#   stage: front-end
+#   environment: production
+#   rules:
+#     - changes:
+#         - "src/**/*"
+#   script:
+#     - npm install
+#     - SERVER=$QUIK_SERVER_URL BUILD_PATH=./fe-build npm run build
+#   artifacts:
+#     paths:
+#       - "fe-build/"
+#     expire_in: 3 days
+#
 build-be:
-  image: node:16.17.1-alpine3.15
+  image: golang:alpine3.19
   stage: back-end
   environment: production
   rules:
@@ -41,8 +41,8 @@ build-be:
         - "server/**/*"
   script:
     - cd server/
-    - npm install
-    - NODE_ENV=production npm run build
+    - go install
+    - CGO_ENABLED=0 GOOS=linux go build -o dist/quik
   artifacts:
     paths:
       - "server/dist/"
@@ -64,7 +64,7 @@ docker_front_end_image_build_branch:
   script:
     - mkdir -p /kaniko/.docker
     - echo "{\"auths\":{\"$CI_REGISTRY\":{\"username\":\"$CI_REGISTRY_USER\",\"password\":\"$CI_REGISTRY_PASSWORD\"}}}" > /kaniko/.docker/config.json
-    - /kaniko/executor --context $CI_PROJECT_DIR --dockerfile $CI_PROJECT_DIR/Dockerfile --destination $CI_REGISTRY_IMAGE/quik-fe:$CI_COMMIT_BRANCH
+    - SERVER=$QUIK_SERVER_URL /kaniko/executor --context $CI_PROJECT_DIR --dockerfile $CI_PROJECT_DIR/Dockerfile --destination $CI_REGISTRY_IMAGE/quik-fe:$CI_COMMIT_BRANCH
 
 docker_back_end_image_build_branch:
   image:
