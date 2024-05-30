@@ -89,10 +89,16 @@ export const Room: React.FC<Props> = ({
   };
 
   const handleKeyDown = (e: KeyboardEvent) => {
-    if (!roundStarted) return;
+    if (!roundStarted && !gameWinner) {
+      handleStartGame()
+    }
     var key = e.key;
     if (key === "Enter") {
-      endTurn();
+      endTurn()
+    }
+    else {
+      const keyUpper = key.toUpperCase();
+      toggleSelectLetter(keyUpper);
     }
   };
 
