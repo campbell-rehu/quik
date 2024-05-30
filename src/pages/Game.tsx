@@ -71,6 +71,7 @@ export const Setup: React.FC<Props> = ({ hardMode }) => {
     return (
       <>
         <Button
+          classes="mb-2"
           label="Create new room"
           onClick={() => {
             createRoom();

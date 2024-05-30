@@ -1630,6 +1630,11 @@
   "resolved" "https://registry.npmjs.org/@rushstack/eslint-patch/-/eslint-patch-1.2.0.tgz"
   "version" "1.2.0"
 
+"@sanity/icons@^3.0.0":
+  "integrity" "sha512-tvAxP5XaqZ6lG3JpAe+ZHWF4JqjFHnvtheY64VyLLO/8lwbiy7Q/Xhh0hYw9Anm0k0HCONcahyMvO+Q18n05tw=="
+  "resolved" "https://registry.npmjs.org/@sanity/icons/-/icons-3.0.0.tgz"
+  "version" "3.0.0"
+
 "@sinclair/typebox@^0.24.1":
   "integrity" "sha512-ka0W0KN5i6LfrSocduwliMMpqVgohtPFidKdMEOUjoOFCHcOOYkKsPRxfs5f15oPNHTm6ERAm0GV/+/LTKeiWg=="
   "resolved" "https://registry.npmjs.org/@sinclair/typebox/-/typebox-0.24.44.tgz"
@@ -7489,10 +7494,10 @@
   optionalDependencies:
     "fsevents" "^2.3.2"
 
-"react@^18.0.0", "react@^18.2.0", "react@>= 16", "react@>=16.8":
-  "integrity" "sha512-/3IjMdb2L9QbBdWiW5e3P2/npwMBaU9mHCSCUzNln0ZCYbcfTsGbTJrU/kGemdH2IWmB2ioZ+zkxtmq6g09fGQ=="
-  "resolved" "https://registry.npmjs.org/react/-/react-18.2.0.tgz"
-  "version" "18.2.0"
+"react@^18.0.0", "react@^18.2.0", "react@^18.3 || >=19.0.0-rc", "react@>= 16", "react@>=16.8":
+  "integrity" "sha512-wS+hAgJShR0KhEvPJArfuPVN1+Hz1t0Y6n5jLrGQbkb4urgPE/0Rve+1kMB1v/oWgHgm4WIcV+i7F2pTVj+2iQ=="
+  "resolved" "https://registry.npmjs.org/react/-/react-18.3.1.tgz"
+  "version" "18.3.1"
   dependencies:
     "loose-envify" "^1.1.0"
 

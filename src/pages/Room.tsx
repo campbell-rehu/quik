@@ -7,6 +7,7 @@ import { Timer } from "../components/Timer";
 import { BooleanMap, Player, Routes } from "../types";
 import { useNavigationContext } from "../components/NavigationContext";
 import classNames from "classnames";
+import { ArrowLeftIcon } from "@sanity/icons";
 
 interface Props {
   roomId: string;
@@ -210,7 +211,9 @@ export const Room: React.FC<Props> = ({
         </div>
       ) : (
         <div className="container">
-          <h1 className="title has-text-centered">Game room: {roomId}</h1>
+          <h1 className="title has-text-centered">
+            Hello, {players[socket.id]}
+          </h1>
           {roundWinner ? (
             <>
               <div className="container is-centered">
@@ -275,8 +278,8 @@ export const Room: React.FC<Props> = ({
           )}
 
           <div className="is-flex">
-            <div>
-              <div className="has-text-weight-bold">Players</div>
+            <div className="box mr4">
+              <div className="has-text-weight-bold is-size-4">Players</div>
               {Object.keys(players).map((playerId) => (
                 <div
                   key={playerId}
@@ -285,6 +288,12 @@ export const Room: React.FC<Props> = ({
                   })}
                 >
                   {players[playerId]}
+                  {isPlayersTurn(playerId) && (
+                    <ArrowLeftIcon
+                      className="ml4"
+                      style={{ verticalAlign: "middle" }}
+                    />
+                  )}{" "}
                 </div>
               ))}
             </div>
