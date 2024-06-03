@@ -33,10 +33,9 @@ type Event struct {
 }
 
 type Player struct {
-	Id           string `json:"id"`
-	Name         string `json:"name"`
-	IsTurn       bool   `json:"isTurn"`
-	Eliminated   bool   `json:"eliminated"`
-	WinCount     int    `json:"winCount"`
-	NextPlayerId string
+	Id         string `json:"id"`
+	Name       string `json:"name"`
+	IsTurn     bool   `json:"isTurn"`
+	Eliminated bool   `json:"eliminated"`
+	WinCount   int    `json:"winCount"`
 }

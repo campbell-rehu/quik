@@ -6,7 +6,7 @@ import {
 } from "../components/WebsocketContext";
 import { Room } from "./Room";
 import { useRoomContext } from "../components/RoomContext";
-import { Player, Routes } from "../types";
+import { Player, PlayersById, Routes } from "../types";
 import { InputField } from "../components/InputField";
 import { useNavigationContext } from "../components/NavigationContext";
 import { SocketEventType } from "../constants";
@@ -46,7 +46,9 @@ export const Setup: React.FC<Props> = ({ hardMode }) => {
     id: socket.id,
     name: "Player",
     isTurn: false,
+    eliminated: false,
   });
+  const [players, setPlayers] = useState<PlayersById>({});
   const [roomHasEnoughPlayers, setRoomHasEnoughPlayers] =
     useState<boolean>(false);
 
@@ -61,10 +63,14 @@ export const Setup: React.FC<Props> = ({ hardMode }) => {
   }, [socket, roomId, playerName]);
 
   useEffect(() => {
-    socket.on(SocketEventType.RoomJoined, ({ currentPlayer, playerCount }) => {
-      setRoomCurrentPlayer(currentPlayer);
-      setRoomHasEnoughPlayers(playerCount > 1);
-    });
+    socket.on(
+      SocketEventType.RoomJoined,
+      ({ players, currentPlayer, playerCount }) => {
+        setRoomCurrentPlayer(currentPlayer);
+        setRoomHasEnoughPlayers(playerCount > 1);
+        setPlayers(players);
+      },
+    );
   }, [socket]);
 
   if (!roomId) {
@@ -120,6 +126,8 @@ export const Setup: React.FC<Props> = ({ hardMode }) => {
       roomId={roomId}
       socket={socket}
       currentPlayer={roomCurrentPlayer}
+      players={players}
+      setPlayers={setPlayers}
       roomHasEnoughPlayers={roomHasEnoughPlayers}
     />
   );

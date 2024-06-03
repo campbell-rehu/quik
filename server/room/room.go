@@ -15,7 +15,7 @@ const DefaultTimerDuration = 10
 type Room struct {
 	Id                 string                   `json:"id"`
 	UsedLetters        map[string]bool          `json:"usedLetters"`
-	Players            map[string]*types.Player `json:"-"`
+	Players            map[string]*types.Player `json:"players"`
 	CurrentPlayer      *types.Player            `json:"currentPlayer"`
 	locked             bool
 	timer              *Timer
@@ -96,6 +96,7 @@ func (r *Room) GetCurrentPlayer() *types.Player {
 }
 
 func (r *Room) LeaveRoom(playerId string) {
+	helpers.Print("player id=%s leaving room", playerId)
 	r.removePlayerFromPlayersMap(playerId)
 	r.removePlayerFromPlayerOrder(playerId)
 	RemovePlayerIdToRoomIdMapping(playerId)

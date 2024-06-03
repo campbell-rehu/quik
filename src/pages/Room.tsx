@@ -4,7 +4,7 @@ import { LettersEasy, SocketEventType, LettersHard } from "../constants";
 import { StringArrayToBooleanMap } from "../helpers";
 import { Letter } from "../components/Letter";
 import { Timer } from "../components/Timer";
-import { BooleanMap, Player, Routes } from "../types";
+import { BooleanMap, Player, PlayersById, Routes } from "../types";
 import { useNavigationContext } from "../components/NavigationContext";
 import classNames from "classnames";
 import { ArrowLeftIcon } from "@sanity/icons";
@@ -13,6 +13,8 @@ interface Props {
   roomId: string;
   socket: Socket;
   currentPlayer: Player;
+  players: PlayersById;
+  setPlayers: (p: PlayersById) => void;
   roomHasEnoughPlayers: boolean;
   hardMode?: boolean;
 }
@@ -21,6 +23,8 @@ export const Room: React.FC<Props> = ({
   roomId,
   socket,
   currentPlayer: currentPlayerInit,
+  players,
+  setPlayers,
   roomHasEnoughPlayers: roomHasEnoughPlayersInit,
   hardMode = false,
 }) => {
@@ -39,7 +43,6 @@ export const Room: React.FC<Props> = ({
     roomHasEnoughPlayersInit,
   );
   const [category, setCategory] = useState<string>("");
-  const [players, setPlayers] = useState<{ [playerId: string]: string }>({});
   const sectionRef = useRef<HTMLElement>(null);
 
   const isThisCurrentPlayer = () => socket.id === currentPlayer.id;
@@ -220,7 +223,7 @@ export const Room: React.FC<Props> = ({
       ) : (
         <div className="container">
           <h1 className="title has-text-centered">
-            Hello, {players[socket.id]}
+            Hello, {players[socket.id]?.name}
           </h1>
           {roundWinner ? (
             <>
@@ -295,7 +298,7 @@ export const Room: React.FC<Props> = ({
                     "has-text-primary": isPlayersTurn(playerId),
                   })}
                 >
-                  {players[playerId]}
+                  {players[playerId].name}
                   {isPlayersTurn(playerId) && (
                     <ArrowLeftIcon
                       className="ml4"

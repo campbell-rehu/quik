@@ -76,19 +76,14 @@ func (s *Socket) OnJoinRoom(client *socket.Socket) func(data ...any) {
 		client.Join(socket.Room(roomId))
 
 		type x struct {
-			Players       map[string]string `json:"players"`
-			UsedLetters   map[string]bool   `json:"usedLetters"`
-			CurrentPlayer *types.Player     `json:"currentPlayer"`
-			PlayerCount   int               `json:"playerCount"`
-		}
-
-		playerNamesById := make(map[string]string)
-		for id, p := range room.Players {
-			playerNamesById[id] = p.Name
+			Players       map[string]*types.Player `json:"players"`
+			UsedLetters   map[string]bool          `json:"usedLetters"`
+			CurrentPlayer *types.Player            `json:"currentPlayer"`
+			PlayerCount   int                      `json:"playerCount"`
 		}
 
 		s.emitToRoom(client, roomId, types.EventTypeRoomJoined, &x{
-			Players:       playerNamesById,
+			Players:       room.Players,
 			UsedLetters:   room.UsedLetters,
 			CurrentPlayer: room.CurrentPlayer,
 			PlayerCount:   room.GetPlayerCount(),
@@ -275,6 +270,11 @@ func (s *Socket) OnResetTimer(client *socket.Socket) WSDoer {
 
 func (s *Socket) OnLeaveRoom(client *socket.Socket) WSDoer {
 	return func(data ...any) {
+		helpers.Print(
+			"client with id=%s ip address=%s leave-room\n",
+			client.Id(),
+			client.Client().Conn().RemoteAddress(),
+		)
 		var t struct {
 			RoomId   string `json:"roomId"`
 			PlayerId string `json:"playerId"`
