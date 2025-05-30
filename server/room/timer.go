@@ -51,6 +51,7 @@ func (t *Timer) start(emitTick func(chan int, chan bool), onTimerExpiry func()) 
 func (t *Timer) doStart(onTimerExpiry func()) {
 	t.started = true
 	baseTime := t.timeLimit
+	wg := t.getWaitGroup()
 	for {
 		select {
 		case <-t.doneCh:
@@ -58,7 +59,7 @@ func (t *Timer) doStart(onTimerExpiry func()) {
 		default:
 			t.tickCh <- baseTime
 			if baseTime == 0 {
-				t.wg.Done()
+				wg.Done()
 				onTimerExpiry()
 				return
 			}
@@ -66,4 +67,16 @@ func (t *Timer) doStart(onTimerExpiry func()) {
 			baseTime--
 		}
 	}
+}
+
+func (t *Timer) getTickCh() chan int {
+	return t.tickCh
+}
+
+func (t *Timer) getDoneCh() chan bool {
+	return t.doneCh
+}
+
+func (t *Timer) getWaitGroup() *sync.WaitGroup {
+	return &t.wg
 }

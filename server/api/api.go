@@ -19,7 +19,7 @@ func (h *RoomHandler) CreateRoom(w http.ResponseWriter, r *http.Request) {
 
 	res, err := json.Marshal(room)
 	if err != nil {
-		log.Printf("Something went wrong: %v", err)
+		log.Printf("Something went wrong: %e", err)
 		return
 	}
 
@@ -41,7 +41,7 @@ func (h *RoomHandler) JoinRoom(w http.ResponseWriter, r *http.Request) {
 
 	res, err := json.Marshal(room)
 	if err != nil {
-		log.Printf("Something went wrong: %v", err)
+		log.Printf("Something went wrong: %e", err)
 		return
 	}
 

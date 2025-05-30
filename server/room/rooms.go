@@ -3,8 +3,6 @@ package room
 import (
 	"errors"
 	"fmt"
-
-	"github.com/campbell-rehu/quik-be/helpers"
 )
 
 var allRooms = newRooms()
@@ -60,6 +58,5 @@ func RemovePlayerIdToRoomIdMapping(playerId string) {
 }
 
 func RemoveRoom(roomId string) {
-	helpers.Print("room id=%s removed", roomId)
 	delete(allRooms.rooms, roomId)
 }
