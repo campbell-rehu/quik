@@ -13,8 +13,12 @@ type Value = {
   socket: Socket
 }
 
+const socketOptions = {
+  transports: ['websocket', 'polling'],
+}
+
 const defaultValue: Value = {
-  socket: io(SERVER_URL),
+  socket: io(SERVER_URL, socketOptions),
 }
 
 const WebSocketContext = createContext<Value>(defaultValue)
@@ -27,7 +31,7 @@ export const WebSocketContextProvider: React.FC<PropsWithChildren> = ({
   const [socket, setSocket] = useState<Socket | null>(null)
 
   useEffect(() => {
-    const newSocket = io(SERVER_URL)
+    const newSocket = io(SERVER_URL, socketOptions)
     setSocket(newSocket)
     return () => {
       newSocket.close()

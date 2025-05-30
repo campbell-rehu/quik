@@ -12,7 +12,7 @@ import (
 	"github.com/rs/cors"
 )
 
-const PORT = "5000"
+const PORT = "9191"
 
 func main() {
 	router := http.NewServeMux()
@@ -21,6 +21,7 @@ func main() {
 		AllowedMethods: []string{
 			http.MethodPost,
 			http.MethodGet,
+			http.MethodOptions,
 		},
 		AllowedHeaders:   []string{"*"},
 		AllowCredentials: false,
@@ -42,7 +43,7 @@ func main() {
 	io.HandleWS()
 
 	exit := make(chan struct{})
-	SignalC := make(chan os.Signal)
+	SignalC := make(chan os.Signal, 1)
 
 	signal.Notify(
 		SignalC,
