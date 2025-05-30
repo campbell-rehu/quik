@@ -1,21 +1,12 @@
 /* eslint-disable react-hooks/exhaustive-deps */
-import React, {
-  KeyboardEvent,
-  useCallback,
-  useEffect,
-  useMemo,
-  useRef,
-  useState,
-} from 'react'
+import React, { useCallback, useEffect, useRef, useState } from 'react'
 import { Socket } from 'socket.io-client'
-import { LettersEasy, SocketEventType, LettersHard } from '../constants'
+import { LettersEasy, LettersHard } from '../constants'
 import { StringArrayToBooleanMap } from '../helpers'
-import { Letter } from '../components/Letter'
 import { Timer } from '../components/Timer'
 import { BooleanMap, Player, PlayersById, Routes } from '../types'
 import { useNavigationContext } from '../components/NavigationContext'
 import classNames from 'classnames'
-import { ArrowLeftIcon } from '@sanity/icons'
 import { useSocketEvents } from '../hooks/useSocketEvents'
 import { useLetterGrid } from '../hooks/useLetterGrid'
 import { Button } from '../components/Button'
@@ -174,31 +165,22 @@ export const Room: React.FC<Props> = ({
     socketEndTurn,
   ])
 
-  const handleKeyDown = useCallback(
-    (e: KeyboardEvent) => {
-      if (!roomHasEnoughPlayers) {
-        return
-      }
-      if (!roundStarted && !gameWinner) {
-        startGame()
-      }
-      var key = e.key
-      if (key === 'Enter') {
-        handleEndTurn()
-      } else {
-        const keyUpper = key.toUpperCase()
-        toggleSelectLetter(keyUpper)
-      }
-    },
-    [
-      roomHasEnoughPlayers,
-      roundStarted,
-      gameWinner,
-      handleEndTurn,
-      toggleSelectLetter,
-      startGame,
-    ]
-  )
+  // eslint-disable-next-line @typescript-eslint/no-unused-vars
+  const handleKeyDown = (e: React.KeyboardEvent) => {
+    if (!roomHasEnoughPlayers) {
+      return
+    }
+    if (!roundStarted && !gameWinner) {
+      startGame()
+    }
+    var key = e.key
+    if (key === 'Enter') {
+      handleEndTurn()
+    } else {
+      const keyUpper = key.toUpperCase()
+      toggleSelectLetter(keyUpper)
+    }
+  }
 
   useEffect(() => setResetTimer(false), [resetTimer])
 
@@ -225,29 +207,22 @@ export const Room: React.FC<Props> = ({
     [roomHasEnoughPlayersInit]
   )
 
-  const playerList = useMemo(
-    () => (
-      <div className='box mr4'>
-        <div className='has-text-weight-bold is-size-4'>Players</div>
-        {Object.keys(players).map((playerId) => (
-          <div
-            key={playerId}
-            className={classNames({
-              'has-text-primary': isPlayersTurn(playerId),
-            })}>
-            {players[playerId].name}
-            {isPlayersTurn(playerId) && (
-              <ArrowLeftIcon
-                className='ml4'
-                style={{ verticalAlign: 'middle' }}
-              />
-            )}{' '}
-          </div>
-        ))}
+  // eslint-disable-next-line @typescript-eslint/no-unused-vars
+  const playerList = Object.values(players).map((player) => {
+    return (
+      <div
+        key={player.id}
+        className={classNames('player-item', {
+          'is-current': isPlayersTurn(player.id),
+          'is-eliminated': player.eliminated,
+        })}>
+        <span className='player-name'>{player.name}</span>
+        {isPlayersTurn(player.id) && (
+          <span className='player-turn-indicator'>←</span>
+        )}
       </div>
-    ),
-    [players, isPlayersTurn]
-  )
+    )
+  })
 
   const letterGrid = useLetterGrid({
     letterSet,
@@ -319,19 +294,7 @@ export const Room: React.FC<Props> = ({
         <div className='game-sidebar'>
           <div className='player-list'>
             <h3 className='title is-4'>Players</h3>
-            {Object.entries(players).map(([id, player]) => (
-              <div
-                key={id}
-                className={classNames('player-item', {
-                  'is-current': isPlayersTurn(id),
-                  'is-eliminated': player.eliminated,
-                })}>
-                <span className='player-name'>{player.name}</span>
-                {isPlayersTurn(id) && (
-                  <span className='player-turn-indicator'>←</span>
-                )}
-              </div>
-            ))}
+            {playerList}
           </div>
         </div>
       </div>

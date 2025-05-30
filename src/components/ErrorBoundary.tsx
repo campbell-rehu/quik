@@ -1,5 +1,4 @@
 import React, { Component, ErrorInfo, ReactNode } from 'react'
-import { useNavigationContext } from './NavigationContext'
 import { Routes } from '../types'
 
 interface Props {

@@ -39,7 +39,6 @@ export const RoomContextProvider: React.FC<Props & PropsWithChildren> = ({
   }
 
   const createRoom = async () => {
-    console.log(SERVER_URL)
     const response = await fetch(`${SERVER_URL}/room`, {
       method: 'POST',
       headers: {
