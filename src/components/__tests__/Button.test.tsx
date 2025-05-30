@@ -1,40 +1,54 @@
-import { screen, render } from '@testing-library/react'
-import userEvent from '@testing-library/user-event'
 import React from 'react'
-import { BrowserRouter } from 'react-router-dom'
-import { Page } from '../../types'
+import { render, fireEvent, screen } from '@testing-library/react'
 import { Button } from '../Button'
 import { NavigationContextProvider } from '../NavigationContext'
+import { Page } from '../../types'
 
 const withNavigationProvider = (component: React.ReactNode) => (
-  <BrowserRouter>
-    <NavigationContextProvider>{component}</NavigationContextProvider>
-  </BrowserRouter>
+  <NavigationContextProvider>{component}</NavigationContextProvider>
 )
 
 describe('Button', () => {
-  it('renders the button', () => {
-    render(
-      withNavigationProvider(<Button to={Page.Game} label='To the game' />)
-    )
-    expect(screen.getByText('To the game')).toBeDefined()
+  const mockOnClick = jest.fn()
+
+  beforeEach(() => {
+    mockOnClick.mockClear()
   })
-  it('calls the optional onclick handler', () => {
-    const onclick = jest.fn()
-    render(
-      withNavigationProvider(
-        <Button to={Page.Game} label='To the game' onClick={onclick} />
-      )
-    )
-    const button = screen.getByText('To the game')
-    expect(button).toBeDefined()
-    userEvent.click(button)
-    expect(onclick).toBeCalled()
+
+  it('renders button with label', () => {
+    render(<Button onClick={mockOnClick} label='Click me' />)
+    expect(screen.getByText('Click me')).toBeInTheDocument()
   })
-  describe('if no label is provided', () => {
-    it('renders the button with the page name', () => {
-      render(withNavigationProvider(<Button to={Page.Game} />))
-      expect(screen.getByText(Page.Game)).toBeDefined()
-    })
+
+  it('calls onClick when clicked', () => {
+    render(<Button onClick={mockOnClick} label='Click me' />)
+    fireEvent.click(screen.getByText('Click me'))
+    expect(mockOnClick).toHaveBeenCalledTimes(1)
+  })
+
+  it('applies custom classes', () => {
+    render(
+      <Button onClick={mockOnClick} label='Click me' classes='custom-class' />
+    )
+    expect(screen.getByText('Click me')).toHaveClass('custom-class')
+  })
+
+  it('renders as disabled when disabled prop is true', () => {
+    render(<Button onClick={mockOnClick} label='Click me' disabled />)
+    const button = screen.getByText('Click me')
+    expect(button).toBeDisabled()
+    fireEvent.click(button)
+    expect(mockOnClick).not.toHaveBeenCalled()
+  })
+
+  it('renders as a link when to prop is provided', () => {
+    render(<Button onClick={mockOnClick} label='Click me' to={Page.Game} />)
+    const link = screen.getByText('Click me')
+    expect(link).toHaveAttribute('href', `/${Page.Game}`)
+  })
+
+  it('applies default button classes', () => {
+    render(<Button onClick={mockOnClick} label='Click me' />)
+    expect(screen.getByText('Click me')).toHaveClass('button', 'is-primary')
   })
 })

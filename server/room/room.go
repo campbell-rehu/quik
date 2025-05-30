@@ -45,11 +45,17 @@ func (r *Room) GetCategory() string {
 }
 
 func (r *Room) SetNextPlayerIndex() {
+<<<<<<< Updated upstream
 	next := r.currentPlayerIndex + 1
 	if next >= len(r.Players) {
 		next = 0
 	}
 	r.currentPlayerIndex = next
+=======
+	if r.Players.GetCurrentPlayer() != nil {
+		r.Players.MoveToNextPlayer()
+	}
+>>>>>>> Stashed changes
 }
 
 func (r *Room) IsLocked() bool {
@@ -74,6 +80,7 @@ func (r *Room) AddPlayerToRoom(playerId, playerName string) error {
 		return err
 	}
 	AddPlayerIdToRoomIdMapping(playerId, r.Id)
+<<<<<<< Updated upstream
 	r.playerOrder = append(r.playerOrder, playerId)
 	r.Players[playerId] = &types.Player{
 		Id:         playerId,
@@ -82,6 +89,9 @@ func (r *Room) AddPlayerToRoom(playerId, playerName string) error {
 		Eliminated: false,
 		WinCount:   0,
 	}
+=======
+	r.Players.AddPlayer(playerId, playerName, false)
+>>>>>>> Stashed changes
 	helpers.Print("player id=%s added to room id=%s", playerId, r.Id)
 	return nil
 }
@@ -90,9 +100,14 @@ func (r *Room) GetPlayerCount() int {
 	return len(r.Players)
 }
 
+<<<<<<< Updated upstream
 func (r *Room) GetCurrentPlayer() *types.Player {
 	currentPlayerId := r.playerOrder[r.currentPlayerIndex]
 	return r.Players[currentPlayerId]
+=======
+func (r *Room) GetCurrentPlayer() *Player {
+	return r.Players.GetCurrentPlayer()
+>>>>>>> Stashed changes
 }
 
 func (r *Room) LeaveRoom(playerId string) {
@@ -135,14 +150,43 @@ func (r *Room) StartTimer(
 	r.timer.start(emitTick, r.handleTimerExpiry(emitEvent))
 }
 
+func (r *Room) PrintRoundPlayers() {
+	currentPlayer := r.Players.GetCurrentPlayer()
+	if currentPlayer == nil {
+		return
+	}
+	helpers.Print("currentPlayer: %v", currentPlayer.Name)
+	curr := currentPlayer.InRound.Next
+	for curr != currentPlayer.InRound {
+		player := r.Players.players[curr.PlayerID]
+		helpers.Print("next: %v", player.Name)
+		curr = curr.Next
+	}
+}
+
 func (r *Room) handleTimerExpiry(emitEvent func(types.EventType, any)) func() {
 	return func() {
 		player := r.eliminateCurrentPlayer()
 		r.SetNextPlayerIndex()
 		type x struct {
+<<<<<<< Updated upstream
 			EliminatedPlayer *types.Player `json:"eliminatedPlayer"`
+=======
+			EliminatedPlayer *Player            `json:"eliminatedPlayer"`
+			Players          map[string]*Player `json:"players"`
+			CurrentPlayer    *Player            `json:"currentPlayer"`
+			UsedLetters      map[string]bool    `json:"usedLetters"`
+			PlayerCount      int                `json:"playerCount"`
+>>>>>>> Stashed changes
 		}
-		emitEvent(types.EventTypePlayerEliminated, &x{EliminatedPlayer: player})
+		emitEvent(types.EventTypePlayerEliminated, &x{
+			EliminatedPlayer: player,
+			Players:          r.Players.ToPlayersMap(),
+			UsedLetters:      r.UsedLetters,
+			CurrentPlayer:    r.Players.GetCurrentPlayer(),
+			PlayerCount:      r.Players.Count,
+		})
+		r.PrintRoundPlayers()
 		if r.getRemainingPlayerCount() == 1 {
 			remainingPlayer := r.getRemainingPlayer()
 			r.increasePlayerWinCount(remainingPlayer.Id)
@@ -173,18 +217,40 @@ func (r *Room) handleTimerExpiry(emitEvent func(types.EventType, any)) func() {
 }
 
 func (r *Room) getRemainingPlayerCount() int {
+<<<<<<< Updated upstream
 	playerCount := r.GetPlayerCount()
 	for _, player := range r.Players {
 		if player.Eliminated {
 			playerCount--
+=======
+	remainingPlayerCount := 0
+	curr := r.Players.roundHead
+	for curr != nil {
+		player := r.Players.players[curr.PlayerID]
+		if !player.Eliminated {
+			remainingPlayerCount++
+		}
+		curr = curr.Next
+		if curr == r.Players.roundHead {
+			break
+>>>>>>> Stashed changes
 		}
 	}
 	return playerCount
 }
 
+<<<<<<< Updated upstream
 func (r *Room) eliminateCurrentPlayer() *types.Player {
 	player := r.Players[r.playerOrder[r.currentPlayerIndex]]
 	r.Players[r.playerOrder[r.currentPlayerIndex]].Eliminated = true
+=======
+func (r *Room) eliminateCurrentPlayer() *Player {
+	if r.Players.GetCurrentPlayer() == nil {
+		return nil
+	}
+	player := r.Players.GetCurrentPlayer()
+	r.Players.EliminatePlayer(player.Id)
+>>>>>>> Stashed changes
 	return player
 }
 
@@ -198,13 +264,23 @@ func (r *Room) resetUsedLetters() {
 	r.UsedLetters = make(map[string]bool)
 }
 
+<<<<<<< Updated upstream
 func (r *Room) resetPlayersState(endGame bool) {
 	for _, player := range r.Players {
 		player.Eliminated = false
 		if endGame {
+=======
+func (r *Room) resetPlayersState(keepWinCount bool) {
+	for _, player := range r.Players.ToPlayersMap() {
+		player.Eliminated = false
+		player.IsTurn = false
+		if !keepWinCount {
+>>>>>>> Stashed changes
 			player.WinCount = 0
 		}
 	}
+	r.Players.RoundActive = false
+	r.Players.RoundWinner = nil
 }
 
 func (r *Room) endGame() {
@@ -226,6 +302,7 @@ func (r *Room) increasePlayerWinCount(playerId string) {
 	r.Players[playerId].WinCount++
 }
 
+<<<<<<< Updated upstream
 func (r *Room) getRemainingPlayer() *types.Player {
 	for _, player := range r.Players {
 		if !player.Eliminated {
@@ -233,6 +310,10 @@ func (r *Room) getRemainingPlayer() *types.Player {
 		}
 	}
 	return nil
+=======
+func (r *Room) getRemainingPlayer() *Player {
+	return r.Players.GetCurrentPlayer()
+>>>>>>> Stashed changes
 }
 
 func (r *Room) ResetTimer() {

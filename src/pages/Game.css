@@ -26,3 +26,140 @@ body {
   font-size: 30px;
   text-align: center;
 }
+
+.setup-container {
+  max-width: 600px;
+  margin: 2rem auto;
+  padding: 2rem;
+  background: white;
+  border-radius: 8px;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+}
+
+.setup-options {
+  text-align: center;
+}
+
+.buttons-container {
+  display: flex;
+  flex-direction: column;
+  gap: 1rem;
+}
+
+.divider {
+  display: flex;
+  align-items: center;
+  text-align: center;
+  margin: 1rem 0;
+}
+
+.divider::before,
+.divider::after {
+  content: '';
+  flex: 1;
+  border-bottom: 1px solid #dbdbdb;
+}
+
+.divider-text {
+  padding: 0 1rem;
+  color: #7a7a7a;
+  font-size: 0.875rem;
+}
+
+.letters-container {
+  margin: 2rem 0;
+}
+
+.letters-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(60px, 1fr));
+  gap: 0.5rem;
+  max-width: 600px;
+  margin: 0 auto;
+}
+
+.letter-button {
+  aspect-ratio: 1;
+  font-size: 1.5rem;
+  font-weight: bold;
+  border-radius: 8px;
+  transition: all 0.2s ease;
+  border: 2px solid #dbdbdb;
+  background: white;
+  cursor: pointer;
+}
+
+.letter-button:hover:not(.is-used) {
+  transform: translateY(-2px);
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+}
+
+.letter-button.is-used {
+  background: #f5f5f5;
+  color: #7a7a7a;
+  cursor: not-allowed;
+  border-color: #dbdbdb;
+}
+
+.letter-button.is-selectable {
+  border-color: #3273dc;
+  color: #3273dc;
+}
+
+.player-list {
+  background: white;
+  border-radius: 8px;
+  padding: 1rem;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+}
+
+.player-item {
+  display: flex;
+  align-items: center;
+  padding: 0.5rem;
+  border-radius: 4px;
+  margin-bottom: 0.5rem;
+}
+
+.player-item.is-current {
+  background: #f5f5f5;
+  font-weight: bold;
+}
+
+.player-item.is-eliminated {
+  opacity: 0.5;
+  text-decoration: line-through;
+}
+
+.timer-container {
+  text-align: center;
+  margin: 1rem 0;
+}
+
+.timer {
+  font-size: 2rem;
+  font-weight: bold;
+  color: #3273dc;
+}
+
+.timer.warning {
+  color: #ff3860;
+}
+
+.game-status {
+  text-align: center;
+  margin: 1rem 0;
+  padding: 1rem;
+  border-radius: 8px;
+  background: #f5f5f5;
+}
+
+.game-status.winner {
+  background: #48c774;
+  color: white;
+}
+
+.game-status.eliminated {
+  background: #ff3860;
+  color: white;
+}

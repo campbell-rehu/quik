@@ -82,12 +82,22 @@ func (s *Socket) OnJoinRoom(client *socket.Socket) func(data ...any) {
 			PlayerCount   int                      `json:"playerCount"`
 		}
 
+<<<<<<< Updated upstream
 		s.emitToRoom(client, roomId, types.EventTypeRoomJoined, &x{
 			Players:       room.Players,
 			UsedLetters:   room.UsedLetters,
 			CurrentPlayer: room.CurrentPlayer,
 			PlayerCount:   room.GetPlayerCount(),
+=======
+		jsonData, _ := json.Marshal(&x{
+			Players:       room.Players.ToPlayersMap(),
+			UsedLetters:   room.UsedLetters,
+			CurrentPlayer: room.Players.GetCurrentPlayer(),
+			PlayerCount:   room.Players.Count,
+>>>>>>> Stashed changes
 		})
+
+		s.emitToRoom(client, roomId, types.EventTypeRoomJoined, string(jsonData))
 	}
 }
 
@@ -139,6 +149,8 @@ func (s *Socket) OnCountdownStarted(client *socket.Socket) func(data ...any) {
 			room.Id,
 		)
 
+		room.PrintRoundPlayers()
+
 		s.emitToRoom(client, roomId, types.EventTypeRoomLocked, data)
 		type x struct {
 			Category      string          `json:"category"`
@@ -148,7 +160,11 @@ func (s *Socket) OnCountdownStarted(client *socket.Socket) func(data ...any) {
 		s.emitToRoom(client, roomId, types.EventTypeRoundStarted, &x{
 			Category:      room.GetCategory(),
 			UsedLetters:   room.UsedLetters,
+<<<<<<< Updated upstream
 			CurrentPlayer: room.CurrentPlayer,
+=======
+			CurrentPlayer: room.Players.GetCurrentPlayer(),
+>>>>>>> Stashed changes
 		})
 
 		s.handleCountdown(client, room)
