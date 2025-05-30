@@ -11,11 +11,6 @@ type Value = {
   setPlayerName: (roomId: string, playerId: string, playerName: string) => void
 }
 
-const defaultHeaders = {
-  'Content-Type': 'application/json',
-  Accept: 'application/json',
-}
-
 const defaultValue: Value = {
   createRoom: () => {},
   joinRoom: () => {},
@@ -46,7 +41,9 @@ export const RoomContextProvider: React.FC<Props & PropsWithChildren> = ({
   const createRoom = async () => {
     const response = await fetch(`${SERVER_URL}/room`, {
       method: 'POST',
-      headers: defaultHeaders,
+      headers: {
+        'Content-Type': 'application/json',
+      },
     })
 
     const room = await parseResponse(response)
@@ -57,7 +54,6 @@ export const RoomContextProvider: React.FC<Props & PropsWithChildren> = ({
   const joinRoom = async (roomId: string) => {
     const response = await fetch(`${SERVER_URL}/room/${roomId}`, {
       method: 'GET',
-      headers: defaultHeaders,
     })
     const room = await parseResponse(response)
     navigate(`/game/${room.id}`)
@@ -71,7 +67,9 @@ export const RoomContextProvider: React.FC<Props & PropsWithChildren> = ({
     const response = await fetch(`${SERVER_URL}/room/${roomId}/addPlayer`, {
       method: 'POST',
       body: JSON.stringify({ playerId, playerName }),
-      headers: defaultHeaders,
+      headers: {
+        'Content-Type': 'application/json',
+      },
     })
     const player = await parseResponse(response)
     setPlayerNameLocal(player.playerName)
